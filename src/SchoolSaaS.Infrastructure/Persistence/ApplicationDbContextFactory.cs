@@ -11,7 +11,9 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../SchoolSaaS.Api"))
             .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile("appsettings.local.json", optional: true)
             .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddJsonFile("appsettings.Development.local.json", optional: true)
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")

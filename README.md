@@ -7,6 +7,14 @@ Multi-tenant student management platform — ASP.NET Core 9 modular monolith, An
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local MySQL, Redis, RabbitMQ — Sprint 1 D9+)
 
+## Local secrets
+
+Copy the example file and set your MySQL password (this file is gitignored):
+
+```bash
+cp src/SchoolSaaS.Api/appsettings.Development.local.json.example src/SchoolSaaS.Api/appsettings.Development.local.json
+```
+
 ## Quick start
 
 ```bash
