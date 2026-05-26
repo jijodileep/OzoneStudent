@@ -19,7 +19,10 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         });
 
-        services.AddValidatorsFromAssembly(applicationAssembly);
+        foreach (var assembly in ValidatorAssemblyDiscovery.Discover())
+        {
+            services.AddValidatorsFromAssembly(assembly);
+        }
 
         return services;
     }

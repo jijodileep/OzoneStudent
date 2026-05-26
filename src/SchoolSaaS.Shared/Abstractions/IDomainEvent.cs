@@ -1,4 +1,4 @@
-namespace SchoolSaaS.Domain.Common;
+namespace SchoolSaaS.Shared.Abstractions;
 
 public interface IDomainEvent
 {

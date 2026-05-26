@@ -1,0 +1,38 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+COPY Directory.Build.props ./
+COPY src/SchoolSaaS.Shared/SchoolSaaS.Shared.csproj src/SchoolSaaS.Shared/
+COPY src/SchoolSaaS.Domain/SchoolSaaS.Domain.csproj src/SchoolSaaS.Domain/
+COPY src/SchoolSaaS.Application/SchoolSaaS.Application.csproj src/SchoolSaaS.Application/
+COPY src/SchoolSaaS.Infrastructure/SchoolSaaS.Infrastructure.csproj src/SchoolSaaS.Infrastructure/
+COPY src/SchoolSaaS.Api/SchoolSaaS.Api.csproj src/SchoolSaaS.Api/
+
+RUN dotnet restore src/SchoolSaaS.Api/SchoolSaaS.Api.csproj
+
+COPY src/ src/
+RUN dotnet publish src/SchoolSaaS.Api/SchoolSaaS.Api.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system appuser \
+    && useradd --system --gid appuser appuser
+
+COPY --from=build /app/publish .
+RUN chown -R appuser:appuser /app
+
+USER appuser
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["dotnet", "SchoolSaaS.Api.dll"]

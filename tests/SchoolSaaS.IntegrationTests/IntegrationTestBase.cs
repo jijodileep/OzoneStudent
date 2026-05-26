@@ -1,36 +1,13 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using Testcontainers.MySql;
 
 namespace SchoolSaaS.IntegrationTests;
 
-public abstract class IntegrationTestBase : IAsyncLifetime
+[Collection(IntegrationTestCollection.Name)]
+public abstract class IntegrationTestBase
 {
-    private readonly MySqlContainer _mysql = new MySqlBuilder("mysql:8.0")
-        .Build();
+    protected IntegrationTestBase(DatabaseFixture fixture) => Fixture = fixture;
 
-    protected WebApplicationFactory<Program> Factory { get; private set; } = null!;
+    protected DatabaseFixture Fixture { get; }
 
-    protected HttpClient Client { get; private set; } = null!;
-
-    public async Task InitializeAsync()
-    {
-        await _mysql.StartAsync();
-
-        Factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.UseSetting(
-                    "ConnectionStrings:DefaultConnection",
-                    _mysql.GetConnectionString());
-            });
-
-        Client = Factory.CreateClient();
-    }
-
-    public async Task DisposeAsync()
-    {
-        Client.Dispose();
-        await Factory.DisposeAsync();
-        await _mysql.DisposeAsync();
-    }
+    protected WebApplicationFactory<Program> Factory => Fixture.Factory;
 }

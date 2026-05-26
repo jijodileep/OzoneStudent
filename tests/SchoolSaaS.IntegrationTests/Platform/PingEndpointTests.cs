@@ -10,7 +10,7 @@ public class PingEndpointTests : IClassFixture<WebApplicationFactory<Program>>
     private readonly HttpClient _client;
 
     public PingEndpointTests(WebApplicationFactory<Program> factory) =>
-        _client = factory.CreateClient();
+        _client = factory.WithWebHostBuilder(b => b.UseSetting("Outbox:Enabled", "false")).CreateClient();
 
     [Fact]
     public async Task Ping_ReturnsPong()

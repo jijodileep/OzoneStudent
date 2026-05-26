@@ -1,4 +1,6 @@
-using SchoolSaaS.Api.Endpoints;
+using SchoolSaaS.Api.Api.V1;
+using SchoolSaaS.Api.Health;
+using SchoolSaaS.Api.DependencyInjection;
 using SchoolSaaS.Api.Infrastructure;
 using SchoolSaaS.Api.Middleware;
 using SchoolSaaS.Application;
@@ -26,8 +28,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.AddApiVersioningServices();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
 
@@ -36,19 +39,15 @@ app.UseSerilogRequestLogging();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwaggerDocumentation();
 
 app.UseAuthentication();
 app.UseMiddleware<TenantContextMiddleware>();
 app.UseAuthorization();
 
 app.MapGet("/", () => "School SaaS API");
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
-app.MapPlatformEndpoints();
+app.MapHealthEndpoints();
+app.MapV1Endpoints();
 
 app.Run();
 

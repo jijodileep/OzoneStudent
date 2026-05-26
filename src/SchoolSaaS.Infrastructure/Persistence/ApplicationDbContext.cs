@@ -2,11 +2,12 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SchoolSaaS.Domain.Common;
 using SchoolSaaS.Domain.Platform;
+using SchoolSaaS.Domain.Platform.Outbox;
 using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.Infrastructure.Persistence;
 
-public sealed class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext
 {
     private readonly ITenantContextAccessor _tenantContextAccessor;
 
@@ -21,6 +22,12 @@ public sealed class ApplicationDbContext : DbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
 
     public DbSet<TenantSetting> TenantSettings => Set<TenantSetting>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<ProcessedEvent> ProcessedEvents => Set<ProcessedEvent>();
+
+    public DbSet<TenantIsolationProbe> TenantIsolationProbes => Set<TenantIsolationProbe>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
