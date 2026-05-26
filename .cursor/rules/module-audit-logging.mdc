@@ -1,0 +1,74 @@
+---
+description: Audit Logging module — universal append-only audit trail
+globs: src/**/Modules/Audit/**/*
+alwaysApply: false
+---
+
+# Module: Audit Logging
+
+## Policy
+
+**Everything significant is logged.** Full spec: `docs/universal-logging-policy.md`
+
+## Key Entities
+
+`AuditLog` — append-only, immutable, no delete API
+
+## Extended Action Enum
+
+```
+Create | Update | Delete | Read | Export | Login | LoginFailed | Logout
+TokenRefresh | PasswordChange | PermissionChange | AccessDenied
+StatusChange | BulkUpdate | BulkDelete | Reverse | Post
+EventPublished | EventConsumed | EventFailed | JobStarted | JobCompleted | JobFailed
+SuperAdminAction | Impersonation | Failed
+```
+
+## Categories
+
+`Auth`, `Rbac`, `Institution`, `Student`, `Attendance`, `Fee`, `Finance`, `Lms`, `Notification`, `Report`, `Social`, `Platform`, `System`
+
+## Permissions
+
+```
+audit.logs.read
+audit.logs.export
+audit.logs.read-all-tenant    # tenant admin — own tenant only
+audit.logs.read-platform      # super admin — cross-tenant
+```
+
+## Pipeline Behaviors
+
+| Behavior | Triggers On |
+|---|---|
+| `AuditBehavior` | All `ICommand` (writes) |
+| `AuditReadBehavior` | Queries marked `[AuditRead]` or in `ReadAuditEntities` config |
+| `AuthorizationBehavior` | Logs `AccessDenied` on 403 |
+| `RequestLoggingMiddleware` | Every HTTP request (Serilog) |
+
+## Key Services
+
+- `IAuditService` / `AuditLogService` — write audit entries
+- `IAccessAuditService` — sensitive read + export logging
+- `EntityChangeCaptureInterceptor` — EF before/after on Update
+
+## APIs
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/audit-logs` | List with filters |
+| GET | `/api/v1/audit-logs/{id}` | Detail |
+| GET | `/api/v1/audit-logs/export` | CSV export (itself audited) |
+| GET | `/api/v1/audit-logs/entity/{type}/{id}` | History for one entity |
+
+## Storage & Retention
+
+- Index: `(tenant_id, created_at DESC)`, `(entity_type, entity_id)`, `(user_id, created_at)`
+- Financial audits: 7-year minimum retention
+- Phase 2: monthly partitioning + cold archive
+
+## Do NOT
+
+- Expose delete/update endpoints for audit logs
+- Bypass audit for super-admin (they get `SuperAdminAction` category instead)
+- Recursively audit audit writes

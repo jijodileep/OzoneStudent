@@ -1,0 +1,61 @@
+---
+description: Attendance — daily marking, edit policy, leave requests
+globs: src/**/Modules/Attendance/**/*
+alwaysApply: false
+---
+
+# Module: Attendance
+
+## Scope
+
+Daily attendance marking (bulk), single-record edits, student attendance history, leave requests (MVP: submit only).
+
+## Key Entities
+
+`AttendanceSession`, `AttendanceRecord`, `AttendanceEditLog`, `LeaveRequest`
+
+## Permissions
+
+```
+attendance.records.mark
+attendance.records.read
+attendance.records.edit
+attendance.leave.submit      # parent
+attendance.leave.approve     # teacher/admin
+attendance.report.read
+```
+
+## Commands (MVP)
+
+- `MarkAttendanceCommand` — bulk upsert for class + date
+- `UpdateAttendanceRecordCommand` — single edit within edit window
+- `SubmitLeaveRequestCommand`, `ApproveLeaveRequestCommand`, `RejectLeaveRequestCommand`
+
+## Status Enum
+
+```csharp
+public enum AttendanceStatus { Present, Absent, Late, Excused }
+```
+
+## Business Rules
+
+- Unique constraint: `(TenantId, ClassId, Date, StudentId)`
+- `AttendanceEditWindowPolicy`: same-day edits only (configurable in tenant settings)
+- Cannot mark attendance for future dates
+- All students in mark request must be enrolled in the class
+- Edit creates `AttendanceEditLog` entry + audit with before/after
+
+## Events
+
+- `AttendanceMarkedIntegrationEvent` — triggers absent parent notification
+- `AttendanceEditedIntegrationEvent`
+- `LeaveApprovedIntegrationEvent`
+
+## Queries
+
+- `GetClassAttendanceQuery` — all students for class on date (pre-fill for marking UI)
+- `GetStudentAttendanceQuery` — history with date range filter
+
+## Background Jobs
+
+- `DailyAbsenteeNotificationJob` — end-of-day summary for unmarked absent students

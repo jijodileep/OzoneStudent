@@ -1,0 +1,63 @@
+---
+description: Student Management — profiles, guardians, enrollment
+globs: src/**/Modules/Students/**/*
+alwaysApply: false
+---
+
+# Module: Student Management
+
+## Scope
+
+Student CRUD, admission numbers, enrollment, guardians, documents (MVP: CRUD only, no bulk import).
+
+## Key Entities
+
+`Student`, `StudentEnrollment`, `Guardian`, `StudentGuardian`, `StudentDocument`
+
+## Permissions
+
+```
+students.profile.create
+students.profile.read
+students.profile.update
+students.profile.delete
+students.enrollment.manage
+students.guardians.manage
+students.documents.manage
+```
+
+## Commands (MVP)
+
+- `CreateStudentCommand`, `UpdateStudentCommand`, `DeleteStudentCommand`
+- `EnrollStudentCommand`, `TransferStudentCommand`, `WithdrawStudentCommand`
+- `CreateGuardianCommand`, `LinkGuardianToStudentCommand`, `UnlinkGuardianFromStudentCommand`
+- `UploadStudentDocumentCommand`, `DeleteStudentDocumentCommand`
+
+## Queries
+
+- `ListStudentsQuery` — paginated, filter by grade/class/section, scope-filtered
+- `GetStudentByIdQuery` — includes enrollment + guardians summary
+- `GetEnrollmentHistoryQuery`
+
+## Business Rules
+
+- `AdmissionNumber` unique per tenant — auto-generated: `{YEAR}-{SEQ}`
+- Enrollment validates class capacity via `EnrollmentClassCapacityValidator`
+- Soft delete student → deactivate active enrollments
+- Guardian link triggers `GuardianLinkedIntegrationEvent` → parent portal invite
+
+## Events
+
+- `StudentAdmittedIntegrationEvent`
+- `StudentPromotedIntegrationEvent`
+- `StudentWithdrawnIntegrationEvent`
+- `GuardianLinkedIntegrationEvent`
+
+## Scope
+
+- Teachers: read/update students in assigned class only
+- Parents: read linked children only (`ScopeType.Self`)
+
+## PII Handling
+
+- Date of birth, address, phone — audit all access in sensitive export endpoints (Phase 2)

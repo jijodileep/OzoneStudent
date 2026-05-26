@@ -1,0 +1,43 @@
+---
+description: RBAC and scope-based authorization enforcement
+globs: src/**/*.cs
+alwaysApply: false
+---
+
+# RBAC & Authorization
+
+## Permission Format
+
+`{module}.{resource}.{action}` — register in `PermissionCatalog.cs`
+
+Examples:
+- `students.profile.create`
+- `attendance.records.mark`
+- `fees.payments.collect`
+- `roles.permissions.assign`
+
+## Command/Query Authorization
+
+```csharp
+[RequirePermission("students.profile.create")]
+public record CreateStudentCommand(...) : IRequest<Result<Guid>>;
+```
+
+`AuthorizationBehavior` reads attribute before handler executes.
+
+## Scope-Based Access
+
+- Teachers: scoped to assigned class(es) via `IScopeResolver`
+- Accountants: tenant-wide for fees, no student PII beyond billing
+- Parents: `Self` scope — only linked children
+- Apply scope in **query handlers**, not just UI hiding
+
+## Role Rules
+
+- System roles (`IsSystem = true`) cannot be deleted or renamed
+- Permission changes invalidate Redis cache: `permissions:{userId}`
+
+## Frontend/Mobile Mirror
+
+- Angular: `*hasPermission="'students.profile.create'"` + `PermissionGuard`
+- Never rely on UI-only hiding — API must enforce

@@ -1,0 +1,60 @@
+---
+description: Notifications — templates, email, in-app dispatch from events
+globs: src/**/Modules/Notifications/**/*
+alwaysApply: false
+---
+
+# Module: Notifications
+
+## Scope
+
+Notification templates, multi-channel dispatch (MVP: email + in-app), event-driven handlers, user preferences.
+
+## Key Entities
+
+`NotificationTemplate`, `Notification`, `NotificationDelivery`, `NotificationPreference`, `DeviceToken`
+
+## Permissions
+
+```
+notifications.template.manage
+notifications.broadcast.send
+notifications.inbox.read
+notifications.preferences.manage
+```
+
+## MVP Event Handlers
+
+| Event | Template | Channels |
+|---|---|---|
+| `AttendanceMarkedIntegrationEvent` (Absent) | `attendance-absent` | email, in-app |
+| `FeePaymentReceivedIntegrationEvent` | `fee-payment-confirmation` | email, in-app |
+| `GuardianLinkedIntegrationEvent` | `guardian-portal-invite` | email |
+| `PasswordResetRequestedIntegrationEvent` | `password-reset` | email |
+
+## Template Placeholders
+
+Use `{StudentName}`, `{ClassName}`, `{Date}`, `{Amount}`, `{ReceiptNumber}`, `{ResetLink}`
+
+## Dispatch Flow
+
+1. Integration event consumed by `NotificationEventHandler`
+2. Load template by key + tenant override
+3. Render via `TemplateRendererService`
+4. Check user `NotificationPreference` (channel opt-out)
+5. Queue via `SendNotificationCommand` → background job
+6. Record `NotificationDelivery` with status: Pending → Sent → Failed
+
+## Rules
+
+- Never log full email body with PII in production logs
+- Failed deliveries retry 3 times with exponential backoff
+- In-app notifications: `IsRead` flag, paginated inbox API
+- SMS/Push deferred to Phase 2 — stub `INotificationProvider` interface only
+
+## API
+
+- `GET /api/v1/notifications/inbox`
+- `PUT /api/v1/notifications/{id}/read`
+- `GET /api/v1/notifications/preferences`
+- `PUT /api/v1/notifications/preferences`

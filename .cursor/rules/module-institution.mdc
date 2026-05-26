@@ -1,0 +1,58 @@
+---
+description: Institution Management — tenants, academic structure, staff
+globs: src/**/Modules/Institution/**/*
+alwaysApply: false
+---
+
+# Module: Institution Management
+
+## Scope
+
+Tenant provisioning, academic years/terms, grades, classes, sections, subjects, staff profiles.
+
+## Key Entities
+
+`Tenant`, `TenantSettings`, `AcademicYear`, `Term`, `Grade`, `Class`, `Section`, `Subject`, `ClassSubject`, `Staff`
+
+## Permissions
+
+```
+institution.tenant.create        # super-admin only
+institution.tenant.manage
+institution.academic-years.manage
+institution.classes.manage
+institution.subjects.manage
+institution.staff.manage
+```
+
+## Commands (MVP)
+
+- `CreateTenantCommand`, `SuspendTenantCommand`, `ActivateTenantCommand`
+- `CreateAcademicYearCommand`, `SetCurrentAcademicYearCommand`
+- `CreateGradeCommand`, `CreateClassCommand`, `CreateSectionCommand`
+- `AssignClassTeacherCommand`, `CreateSubjectCommand`, `AssignSubjectToClassCommand`
+- `CreateStaffCommand`, `LinkStaffToUserCommand`
+
+## Validation Rules
+
+- Academic year dates must not overlap within tenant
+- Only one `IsCurrent = true` academic year per tenant
+- Class capacity must be positive integer
+- Class teacher must be active staff in same tenant
+
+## Events
+
+- `TenantCreatedIntegrationEvent` → seed defaults (roles, CoA stub)
+- `AcademicYearChangedIntegrationEvent`
+
+## Hierarchy
+
+```
+Tenant → AcademicYear → Grade → Class → Section
+                              ↘ Subject (via ClassSubject)
+```
+
+## Dependencies
+
+- Identity module for `User` linking on staff
+- RBAC for tenant admin role seeding on provisioning

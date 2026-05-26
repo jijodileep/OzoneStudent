@@ -1,0 +1,54 @@
+Issue Type,Summary,Description,Priority,Story Points,Epic Name,Sprint,Labels,Component,Acceptance Criteria,Depends On
+Epic,Platform Foundation,"Shared kernel: Clean Architecture, multi-tenancy, event bus, caching, API infrastructure.",Highest,,Platform Foundation,,epic;backend;foundation,Backend,,,
+Epic,Identity & RBAC,"Authentication, JWT/refresh, user management, roles, permissions, scope authorization.",Highest,,Identity & RBAC,,epic;backend;security,Backend,,,
+Epic,Audit & Compliance,"Centralized audit logging, entity change tracking, audit viewer.",High,,Audit & Compliance,,epic;backend;compliance,Backend,,,
+Epic,Institution Management,"Tenant provisioning, academic years, grades, classes, sections, staff.",High,,Institution Management,,epic;backend,Backend,,,
+Epic,Student Management,"Student CRUD, guardians, enrollment (MVP scope).",High,,Student Management,,epic;backend,Backend,,,
+Epic,Attendance,"Daily attendance marking, edit policy, parent visibility.",Medium,,Attendance,,epic;backend,Backend,,,
+Epic,Fees Management,"Fee structures, invoicing, manual payments, receipts.",Medium,,Fees Management,,epic;backend,Backend,,,
+Epic,Notifications,"Email + in-app notifications from domain events.",Medium,,Notifications,,epic;backend,Backend,,,
+Epic,Admin Web App,"Angular 19 admin portal with all MVP feature UIs.",Medium,,Admin Web App,,epic;frontend,Frontend,,,
+Epic,Parent Mobile App,"Flutter parent app: auth, attendance, fees view.",Low,,Parent Mobile App,,epic;mobile,Mobile,,,
+Epic,DevOps & Deployment,"Docker, CI/CD, Nginx, VPS deployment, backups.",Highest,,DevOps & Deployment,,epic;devops,DevOps,,,
+Story,CreateSolutionStructure,"Create SchoolSaaS.sln with Api, Application, Domain, Infrastructure, Shared. Modular folders under Modules/.",Highest,3,Platform Foundation,Sprint 1,backend;foundation,Backend,"Solution builds; layer references enforced; folder structure documented",,
+Story,DefineBaseEntity,"BaseEntity: Id, TenantId, audit fields, IsDeleted. AuditableEntity extension.",Highest,2,Platform Foundation,Sprint 1,backend;foundation,Backend,"All domain entities inherit BaseEntity; soft delete supported",CreateSolutionStructure
+Story,ConfigureEfCorePostgreSql,"DbContext, PostgreSQL, snake_case naming, env-based connection string.",Highest,3,Platform Foundation,Sprint 1,backend;database,Backend,"DbContext registers; migrations run against local PostgreSQL",CreateSolutionStructure
+Story,DefineITenantContext,"ITenantContext: TenantId, BranchId?, UserId. Scoped DI.",Highest,2,Platform Foundation,Sprint 1,backend;tenancy,Backend,"Tenant context available in request scope",DefineBaseEntity
+Story,ImplementTenantContextMiddleware,"Resolve tenant from JWT. Reject invalid tenant.",Highest,3,Platform Foundation,Sprint 1,backend;tenancy,Backend,"Requests without valid tenant return 401/403",DefineITenantContext
+Story,CreateTenantQueryFilter,"EF global query filter on TenantId.",Highest,3,Platform Foundation,Sprint 1,backend;tenancy,Backend,"All queries auto-filtered by tenant",ConfigureEfCorePostgreSql;DefineITenantContext
+Story,RegisterMediatRPipeline,"MediatR assembly scanning from all modules.",Highest,2,Platform Foundation,Sprint 1,backend;foundation,Backend,"Commands and queries resolve via DI",CreateSolutionStructure
+Story,CreateValidationBehavior,"MediatR FluentValidation pipeline behavior.",Highest,2,Platform Foundation,Sprint 1,backend;validation,Backend,"Invalid commands rejected before handler",RegisterMediatRPipeline
+Story,CreateLoggingBehavior,"MediatR Serilog structured logging behavior.",Highest,2,Platform Foundation,Sprint 1,backend;foundation,Backend,"All commands logged with correlation ID",RegisterMediatRPipeline
+Story,CreateTenantBehavior,"MediatR tenant context injection behavior.",Highest,2,Platform Foundation,Sprint 1,backend;tenancy,Backend,"Handlers receive ITenantContext automatically",DefineITenantContext;RegisterMediatRPipeline
+Story,DefineResultPattern,"Result<T>, Error, ValidationError types.",Highest,2,Platform Foundation,Sprint 1,backend;foundation,Backend,"Handlers return Result instead of throwing for business errors",CreateSolutionStructure
+Story,DefineGlobalExceptionHandler,"RFC 7807 ProblemDetails middleware.",Highest,3,Platform Foundation,Sprint 1,backend;api,Backend,"Consistent error JSON for all API errors",DefineResultPattern
+Story,ConfigureApiVersioning,"URL segment versioning /api/v1/.",Highest,2,Platform Foundation,Sprint 1,backend;api,Backend,"Versioned routes work; unversioned rejected or redirected",CreateSolutionStructure
+Story,ConfigureSwaggerOpenApi,"Swagger with JWT + tenant header docs.",Highest,2,Platform Foundation,Sprint 1,backend;api,Backend,"Swagger UI accessible; auth flow documented",ConfigureApiVersioning
+Story,CreateTenantsTableMigration,"tenants table with slug, status, plan, settings.",Highest,2,Platform Foundation,Sprint 1,database;tenancy,Database,"Migration applies cleanly",ConfigureEfCorePostgreSql
+Story,DefineIntegrationEventBase,"EventId, TenantId, OccurredAt, EventType.",Highest,2,Platform Foundation,Sprint 1,backend;events,Backend,"All integration events inherit base",DefineBaseEntity
+Story,ImplementOutboxPattern,"Outbox entity, interceptor, publisher background service.",Highest,8,Platform Foundation,Sprint 1,backend;events,Backend,"Events published after DB commit; idempotent consumer",DefineIntegrationEventBase
+Story,ConfigureRedisAndCacheService,"Redis connection + ICacheService with tenant prefix.",High,4,Platform Foundation,Sprint 1,backend;cache,Backend,"Cache keys isolated per tenant",CreateSolutionStructure
+Story,TenantIsolationIntegrationTest,"Verify tenant A cannot access tenant B data.",Highest,3,Platform Foundation,Sprint 1,testing,Testing,"Test passes in CI",CreateTenantQueryFilter
+Story,CreateDockerComposeLocal,"Local PostgreSQL, Redis, RabbitMQ stack.",Highest,3,DevOps & Deployment,Sprint 1,devops,DevOps,"docker compose up starts all services",,
+Story,CreateDockerfileApi,"Multi-stage API Docker build.",Highest,2,DevOps & Deployment,Sprint 1,devops,DevOps,"Docker image builds and runs",CreateSolutionStructure
+Story,CiBuildApiWorkflow,"GitHub Actions: build, test on PR.",Highest,3,DevOps & Deployment,Sprint 1,devops,DevOps,"CI green on main branch",CreateDockerfileApi
+Story,CreateUserEntityAndAuthCommands,"User entity, login, refresh, logout, register, invite.",Highest,13,Identity & RBAC,Sprint 2,backend;security,Backend,"Users can login, refresh, logout; JWT contains tenant claim",CreateTenantsTableMigration
+Story,ImplementRBACPermissionEngine,"Permissions, roles, assignment, resolver, authorization behavior.",Highest,13,Identity & RBAC,Sprint 2,backend;rbac,Backend,"Permission check blocks unauthorized commands; cache works",CreateUserEntityAndAuthCommands
+Story,ImplementAuditInfrastructure,"Audit entity, service, MediatR behavior, EF interceptor.",High,8,Audit & Compliance,Sprint 2,backend;audit,Backend,"All commands produce audit entries; logs are append-only",RegisterMediatRPipeline
+Story,CreateAngularWorkspaceAndAuth,"Angular 19 workspace, login page, auth service, guards, interceptors.",High,8,Admin Web App,Sprint 2,frontend,Frontend,"Admin can login and access protected route",CreateHttpInterceptorChain
+Story,TenantProvisioning,"CreateTenant, provisioning service, suspend, super-admin endpoints.",Highest,8,Institution Management,Sprint 3,backend,Backend,"New tenant gets default roles and admin user",SeedDefaultRolesMigration
+Story,AcademicStructureBackend,"Academic years, grades, classes, sections, subjects CRUD.",Highest,13,Institution Management,Sprint 3,backend,Backend,"Full academic hierarchy CRUD with validation",CreateAcademicYearEntity
+Story,StaffManagementBackend,"Staff profiles, link to users.",High,5,Institution Management,Sprint 3,backend,Backend,"Staff CRUD and user linking works",CreateUserEntityAndAuthCommands
+Story,AdminShellAndInstitutionUI,"App shell, sidebar, academic year UI, grade/class tree, role management.",High,21,Admin Web App,Sprint 3,frontend,Frontend,"Admin can manage academic structure and roles via UI",CreateAngularWorkspaceAndAuth
+Story,StudentManagementBackend,"Student CRUD, enrollment, guardians, all endpoints.",Highest,21,Student Management,Sprint 4,backend,Backend,"Full student lifecycle API with RBAC and audit",AcademicStructureBackend
+Story,StudentManagementAdminUI,"Student list, create/edit, detail, guardian management.",High,16,Admin Web App,Sprint 4,frontend,Frontend,"Admin can manage students and guardians via UI",AdminShellAndInstitutionUI
+Story,AttendanceBackend,"Mark attendance, edit policy, query endpoints, events.",Highest,13,Attendance,Sprint 5,backend,Backend,"Teachers mark attendance; edits audited; absent event fires",StudentManagementBackend
+Story,AttendanceAdminUI,"Attendance marking page with class/date selector.",High,8,Admin Web App,Sprint 5,frontend,Frontend,"Teacher can mark daily attendance via UI",AdminShellAndInstitutionUI
+Story,FeesStructureAndInvoicingBackend,"Fee structures, class assignment, invoice generation.",Highest,13,Fees Management,Sprint 5,backend,Backend,"Invoices generated correctly from fee structures",StudentManagementBackend
+Story,FeesAdminUI,"Fee structure UI, invoice generation wizard, invoice list.",High,13,Admin Web App,Sprint 5,frontend,Frontend,"Accountant can configure fees and generate invoices",AdminShellAndInstitutionUI
+Story,PaymentCollectionBackend,"Record payment, receipt, ledger, outstanding dues.",Highest,13,Fees Management,Sprint 6,backend,Backend,"Payments recorded; receipts generated; ledger accurate",FeesStructureAndInvoicingBackend
+Story,NotificationEngine,"Templates, email + in-app providers, event handlers.",High,13,Notifications,Sprint 6,backend,Backend,"Absent and payment events trigger notifications",ImplementOutboxPattern
+Story,FeesAndAuditAdminUI,"Payment form, student ledger, outstanding dues, audit viewer.",High,13,Admin Web App,Sprint 6,frontend,Frontend,"Accountant collects payment; admin views audit logs",FeesAdminUI
+Story,ParentMobileAppMVP,"Flutter app: auth, child selector, attendance, fees, notifications.",Medium,21,Parent Mobile App,Sprint 6,mobile,Mobile,"Parent can login and view child attendance and fees",AttendanceBackend;PaymentCollectionBackend
+Story,ProductionDeployment,"Production compose, Nginx, SSL, CD pipeline, backups, health checks.",Highest,13,DevOps & Deployment,Sprint 6,devops,DevOps,"Staging deploy automated; health checks pass; backups scheduled",CiBuildApiWorkflow
+Story,MVPIntegrationTestSuite,"E2E: tenant > student > attendance > invoice > payment.",Highest,8,Platform Foundation,Sprint 6,testing,Testing,"Full MVP workflow passes in CI",PaymentCollectionBackend;AttendanceBackend

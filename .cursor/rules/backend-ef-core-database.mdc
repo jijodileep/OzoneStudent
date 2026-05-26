@@ -1,0 +1,54 @@
+---
+description: EF Core entity, configuration, and migration conventions
+globs: src/**/{Domain,Infrastructure}/**/*.cs
+alwaysApply: false
+---
+
+# EF Core & Database
+
+## Entity Base
+
+```csharp
+public abstract class BaseEntity
+{
+    public Guid Id { get; set; }
+    public Guid TenantId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public Guid? UpdatedBy { get; set; }
+    public bool IsDeleted { get; set; }
+}
+```
+
+## Configuration Class (per entity)
+
+```csharp
+public class StudentConfiguration : IEntityTypeConfiguration<Student>
+{
+    public void Configure(EntityTypeBuilder<Student> builder)
+    {
+        builder.ToTable("students");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.TenantId, x.AdmissionNumber }).IsUnique();
+        builder.HasQueryFilter(x => !x.IsDeleted);
+    }
+}
+```
+
+## Migration Naming
+
+`{Timestamp}_{Module}_{Description}` — e.g. `20260101_Students_CreateStudentsTable`
+
+## Rules
+
+- snake_case table and column names
+- Always add index on `(tenant_id, ...)` for lookup columns
+- Soft delete via `IsDeleted` + global query filter
+- JSON columns for settings: `json` in MySQL
+- No cascade delete across modules — soft delete + events instead
+
+## Money Fields
+
+- Use `decimal(18,2)` — never `float`/`double`
+- Store currency in tenant settings; amounts in tenant default currency for MVP

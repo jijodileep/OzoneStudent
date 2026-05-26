@@ -1,0 +1,60 @@
+---
+description: Event-driven integration patterns via outbox and RabbitMQ
+globs: src/**/{Events,EventHandlers,IntegrationEvents}/**/*
+alwaysApply: false
+---
+
+# Event-Driven Architecture
+
+## Event Types
+
+| Type | Base | Purpose |
+|---|---|---|
+| Domain Event | `IDomainEvent` | In-process, same transaction |
+| Integration Event | `IntegrationEventBase` | Cross-module, via outbox → RabbitMQ |
+
+## Integration Event Base
+
+```csharp
+public abstract record IntegrationEventBase : IDomainEvent
+{
+    public Guid EventId { get; init; } = Guid.NewGuid();
+    public Guid TenantId { get; init; }
+    public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
+}
+```
+
+## Publishing (in command handler)
+
+```csharp
+student.AddDomainEvent(new StudentAdmittedIntegrationEvent(student.Id, student.TenantId));
+// Outbox interceptor captures on SaveChanges
+```
+
+## Consuming
+
+```csharp
+public class StudentAdmittedNotificationHandler 
+    : IEventHandler<StudentAdmittedIntegrationEvent>
+{
+    public async Task Handle(StudentAdmittedIntegrationEvent evt, CancellationToken ct) { }
+}
+```
+
+## Rules
+
+- Handlers must be **idempotent** — check `ProcessedEvents` table by `EventId`
+- Handlers must NOT call `SaveChanges` on another module's DbContext directly
+- Failed handlers: retry 3x → dead letter queue
+- Never publish integration events before DB commit (outbox guarantees this)
+
+## MVP Events by Module
+
+| Module | Events |
+|---|---|
+| Identity | `UserRegistered`, `PasswordResetRequested`, `UserLocked` |
+| Institution | `TenantCreated`, `AcademicYearChanged` |
+| Students | `StudentAdmitted`, `StudentWithdrawn`, `GuardianLinked` |
+| Attendance | `AttendanceMarked`, `AttendanceEdited` |
+| Fees | `FeeInvoiceGenerated`, `FeePaymentReceived`, `FeeOverdue` |
+| RBAC | `RolePermissionsChanged`, `UserRoleAssigned` |

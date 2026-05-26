@@ -1,0 +1,38 @@
+---
+description: Multi-tenant isolation rules for all backend code
+globs: src/**/*.cs
+alwaysApply: false
+---
+
+# Multi-Tenancy
+
+## ITenantContext
+
+- Resolved in middleware from JWT `tenant_id` claim — never from request body.
+- Inject `ITenantContext` in handlers; do not pass `TenantId` as command parameter from API.
+
+## Entity Rules
+
+- All tenant-scoped entities inherit `BaseEntity` with `TenantId`.
+- Global query filter applied in `DbContext.OnModelCreating` — do not manually filter unless bypassing for super-admin.
+
+```csharp
+// ❌ BAD — trusting client
+public record CreateStudentCommand(Guid TenantId, string Name);
+
+// ✅ GOOD — tenant from context
+entity.TenantId = _tenantContext.TenantId;
+```
+
+## Super-Admin Exception
+
+- Super-admin endpoints (tenant provisioning) use explicit `[SuperAdminOnly]` policy.
+- Must NOT use tenant query filter bypass unless audited and justified.
+
+## Cache Keys
+
+- Prefix all Redis keys: `tenant:{tenantId}:{key}`
+
+## Tests Required
+
+- Every new entity: add `TenantIsolationIntegrationTest` proving cross-tenant read/write fails.

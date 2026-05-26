@@ -1,0 +1,55 @@
+---
+description: Identity & Authentication module — users, JWT, login, invitations
+globs: src/**/Modules/Identity/**/*
+alwaysApply: false
+---
+
+# Module: Identity & Authentication
+
+## Scope
+
+User registration, login, JWT/refresh tokens, password reset, invitations, session management.
+
+## Key Entities
+
+`User`, `UserProfile`, `RefreshToken`, `LoginAttempt`, `UserInvitation`, `PasswordResetToken`
+
+## Permissions
+
+```
+auth.profile.read
+auth.profile.update
+auth.password.change
+users.invite
+users.manage
+```
+
+## Commands (MVP)
+
+- `RegisterUserCommand`, `InviteUserCommand`, `AcceptInvitationCommand`
+- `LoginCommand`, `RefreshTokenCommand`, `RevokeRefreshTokenCommand`
+- `ForgotPasswordCommand`, `ResetPasswordCommand`, `ChangePasswordCommand`
+
+## Security Rules
+
+- Passwords: bcrypt/Argon2, never log or return in responses
+- JWT claims: `sub`, `tenant_id`, `email`, `roles[]`
+- Refresh token rotation: invalidate old token on refresh
+- Lockout after 5 failed attempts (Redis counter, 15-min lock)
+- Reset tokens: single-use, 1-hour expiry
+
+## Events
+
+- `UserRegisteredIntegrationEvent`
+- `PasswordResetRequestedIntegrationEvent`
+- `UserLockedIntegrationEvent`
+
+## API Prefix
+
+`/api/v1/auth/*` and `/api/v1/users/*`
+
+## Do NOT
+
+- Store plaintext passwords or reset tokens
+- Include sensitive claims in JWT beyond what's needed
+- Allow login without tenant context resolution

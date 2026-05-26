@@ -1,0 +1,32 @@
+---
+description: Core multi-tenant SaaS principles — applies to all code in this project
+alwaysApply: true
+---
+
+# Student SaaS — Platform Core
+
+## Non-Negotiables (every feature)
+
+1. **Tenant isolation** — Never accept `TenantId` from client body/query. Resolve via `ITenantContext` (JWT/subdomain).
+2. **RBAC** — Every command/query and API endpoint must declare `[RequirePermission("module.resource.action")]`.
+3. **Audit & logging** — Log everything significant: all writes, auth, RBAC changes, sensitive reads, exports, files, events, jobs. Writes → `AuditBehavior`; sensitive reads → `AuditReadBehavior`. Every HTTP request → Serilog. See `docs/universal-logging-policy.md`.
+4. **Soft delete** — Set `IsDeleted = true`; never hard-delete business entities.
+5. **Validation** — Every command has a FluentValidation `AbstractValidator<T>`.
+6. **Result pattern** — Handlers return `Result<T>`, not exceptions for business failures.
+
+## Module Boundaries
+
+- Modular monolith: `src/Modules/{ModuleName}/` owns Domain + Application for that module.
+- Modules communicate via **integration events** (outbox), not direct repository access across modules.
+- Shared abstractions live in `SchoolSaaS.Shared` or `SchoolSaaS.Domain` (base entities, interfaces only).
+
+## Naming
+
+- Permissions: `{module}.{resource}.{action}` — e.g. `students.profile.create`
+- Commands: `{Verb}{Entity}Command` — e.g. `CreateStudentCommand`
+- Queries: `{Verb}{Entity}Query` — e.g. `ListStudentsQuery`
+- Endpoints: `{Entity}{Verb}Endpoint` mapping to `/api/v1/{resource}`
+
+## When Implementing a Backlog Task
+
+Reference task ID from `backlog/mvp-phase1-linear-import.csv`. Deliver: entity (if new), command/query + handler, validator, endpoint, migration, unit test, integration test (if DB).

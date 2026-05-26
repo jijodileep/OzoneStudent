@@ -1,0 +1,251 @@
+Title,Description,Priority,Status,Estimate,Labels,Project,Milestone,Parent issue,Blocked by
+"[EPIC] Platform Foundation","Shared kernel: Clean Architecture solution, multi-tenancy, event bus, caching, API infrastructure. Blocks all other epics.",1,Todo,,epic;backend;foundation,Student SaaS,MVP Phase 1,,
+"[EPIC] Identity & RBAC","Authentication, JWT/refresh tokens, user management, roles, permissions, scope-based authorization.",1,Todo,,epic;backend;security,Student SaaS,MVP Phase 1,,
+"[EPIC] Audit & Compliance","Centralized audit logging, entity change tracking, audit viewer API.",2,Todo,,epic;backend;compliance,Student SaaS,MVP Phase 1,,
+"[EPIC] Institution Management","Tenant provisioning, academic years, grades, classes, sections, subjects, staff.",2,Todo,,epic;backend,Student SaaS,MVP Phase 1,,
+"[EPIC] Student Management","Student CRUD, guardians, enrollment, documents (MVP scope).",2,Todo,,epic;backend,Student SaaS,MVP Phase 1,,
+"[EPIC] Attendance","Daily attendance marking, edit policy, parent visibility.",3,Todo,,epic;backend,Student SaaS,MVP Phase 1,,
+"[EPIC] Fees Management","Fee structures, invoicing, manual payments, receipts, dues.",3,Todo,,epic;backend,Student SaaS,MVP Phase 1,,
+"[EPIC] Notifications","Email + in-app notifications driven by domain events.",3,Todo,,epic;backend,Student SaaS,MVP Phase 1,,
+"[EPIC] Admin Web App","Angular 19 admin portal: shell, auth, and all MVP feature UIs.",3,Todo,,epic;frontend,Student SaaS,MVP Phase 1,,
+"[EPIC] Parent Mobile App","Flutter parent app: auth, child selector, attendance, fees.",4,Todo,,epic;mobile,Student SaaS,MVP Phase 1,,
+"[EPIC] DevOps & Deployment","Docker, CI/CD, Nginx, VPS deployment, health checks, backups.",1,Todo,,epic;devops,Student SaaS,MVP Phase 1,,
+CreateSolutionStructure,"Create SchoolSaaS.sln with Api, Application, Domain, Infrastructure, Shared projects. Modular folder structure under Modules/.",1,Todo,3,backend;foundation,Sprint 1,[EPIC] Platform Foundation,,
+DefineBaseEntity,"Abstract BaseEntity: Id, TenantId, CreatedAt, UpdatedAt, CreatedBy, IsDeleted. AuditableEntity extends with change metadata.",1,Todo,2,backend;foundation,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+ConfigureEfCorePostgreSql,"Register DbContext, PostgreSQL provider, snake_case naming convention, connection string per environment.",1,Todo,3,backend;database,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+DefineITenantContext,"Interface: TenantId, BranchId?, UserId. Scoped DI registration.",1,Todo,2,backend;tenancy,Sprint 1,[EPIC] Platform Foundation,DefineBaseEntity
+ImplementTenantContextMiddleware,"Resolve tenant from JWT claim. Reject requests with missing/invalid tenant.",1,Todo,3,backend;tenancy,Sprint 1,[EPIC] Platform Foundation,DefineITenantContext
+CreateTenantQueryFilter,"EF Core global query filter on TenantId for all tenant-scoped entities.",1,Todo,3,backend;tenancy,Sprint 1,[EPIC] Platform Foundation,ConfigureEfCorePostgreSql;DefineITenantContext
+CreateTenantSaveChangesInterceptor,"Auto-stamp TenantId on insert. Prevent cross-tenant writes.",1,Todo,2,backend;tenancy,Sprint 1,[EPIC] Platform Foundation,CreateTenantQueryFilter
+RegisterMediatRPipeline,"Register MediatR with assembly scanning from all module assemblies.",1,Todo,2,backend;foundation,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+CreateValidationBehavior,"MediatR pipeline: run FluentValidation before handler execution.",1,Todo,2,backend;validation,Sprint 1,[EPIC] Platform Foundation,RegisterMediatRPipeline
+CreateLoggingBehavior,"MediatR pipeline: structured Serilog logging with CorrelationId.",1,Todo,2,backend;foundation,Sprint 1,[EPIC] Platform Foundation,RegisterMediatRPipeline
+CreateTenantBehavior,"MediatR pipeline: inject ITenantContext into handlers.",1,Todo,2,backend;tenancy,Sprint 1,[EPIC] Platform Foundation,DefineITenantContext;RegisterMediatRPipeline
+DefineResultPattern,"Result<T>, Error, ValidationError types for consistent handler responses.",1,Todo,2,backend;foundation,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+DefineGlobalExceptionHandler,"RFC 7807 ProblemDetails middleware. Map domain exceptions to HTTP status.",1,Todo,3,backend;api,Sprint 1,[EPIC] Platform Foundation,DefineResultPattern
+ConfigureApiVersioning,"ASP.NET API versioning with URL segment /api/v1/.",1,Todo,2,backend;api,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+ConfigureSwaggerOpenApi,"Swagger UI with JWT bearer + X-Tenant-Id header documentation.",1,Todo,2,backend;api,Sprint 1,[EPIC] Platform Foundation,ConfigureApiVersioning
+ConfigureFluentValidationAssemblyScan,"Auto-register validators from all module assemblies on startup.",1,Todo,1,backend;validation,Sprint 1,[EPIC] Platform Foundation,CreateValidationBehavior
+CreateTenantsTableMigration,"tenants table: id, name, slug, status, plan, settings_json, timestamps.",1,Todo,2,database;tenancy,Sprint 1,[EPIC] Platform Foundation,ConfigureEfCorePostgreSql
+CreateTenantSettingsTableMigration,"tenant_settings key-value store for institution configuration.",1,Todo,1,database;tenancy,Sprint 1,[EPIC] Platform Foundation,CreateTenantsTableMigration
+DefineIntegrationEventBase,"Base class: EventId, TenantId, OccurredAt, EventType.",1,Todo,2,backend;events,Sprint 1,[EPIC] Platform Foundation,DefineBaseEntity
+CreateOutboxMessageEntity,"Outbox table entity for transactional outbox pattern.",1,Todo,2,backend;events,Sprint 1,[EPIC] Platform Foundation,DefineIntegrationEventBase
+ImplementOutboxSaveChangesInterceptor,"Capture domain events to outbox on SaveChanges.",1,Todo,3,backend;events,Sprint 1,[EPIC] Platform Foundation,CreateOutboxMessageEntity
+CreateOutboxPublisherBackgroundService,"Poll outbox, publish to RabbitMQ, mark processed.",1,Todo,5,backend;events,Sprint 1,[EPIC] Platform Foundation,ImplementOutboxSaveChangesInterceptor
+ConfigureRedisConnection,"StackExchange.Redis with tenant-prefixed cache keys.",2,Todo,2,backend;cache,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+CreateICacheService,"Get/Set/Remove/Invalidate with TTL support.",2,Todo,2,backend;cache,Sprint 1,[EPIC] Platform Foundation,ConfigureRedisConnection
+CreateTestProjectStructure,"Unit, Integration, Architecture test projects with xUnit.",1,Todo,2,testing,Sprint 1,[EPIC] Platform Foundation,CreateSolutionStructure
+CreateArchitectureTestRules,"NetArchTest: enforce layer dependency direction.",1,Todo,2,testing,Sprint 1,[EPIC] Platform Foundation,CreateTestProjectStructure
+TenantIsolationIntegrationTest,"Verify tenant A cannot read/write tenant B data.",1,Todo,3,testing;tenancy,Sprint 1,[EPIC] Platform Foundation,CreateTenantQueryFilter
+CreateDockerComposeLocal,"PostgreSQL, Redis, RabbitMQ local dev stack.",1,Todo,3,devops,Sprint 1,[EPIC] DevOps & Deployment,,
+CreateDockerfileApi,"Multi-stage Docker build for API project.",1,Todo,2,devops,Sprint 1,[EPIC] DevOps & Deployment,CreateSolutionStructure
+CiBuildApiWorkflow,"GitHub Actions: build, test, lint on PR.",1,Todo,3,devops,Sprint 1,[EPIC] DevOps & Deployment,CreateTestProjectStructure
+CreateUserEntity,"users + user_profiles entities with tenant scope.",1,Todo,2,backend;database,Sprint 2,[EPIC] Identity & RBAC,DefineBaseEntity;CreateTenantsTableMigration
+CreateUsersTableMigration,"users, user_profiles, refresh_tokens, login_attempts tables.",1,Todo,2,database,Sprint 2,[EPIC] Identity & RBAC,CreateUserEntity
+RegisterUserCommand,"Command + Handler: admin-invited user registration.",1,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,CreateUserEntity
+RegisterUserValidator,"Email unique per tenant, password strength rules.",1,Todo,2,backend;validation,Sprint 2,[EPIC] Identity & RBAC,RegisterUserCommand
+InviteUserCommand,"Admin invites user by email with role pre-assignment.",1,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,RegisterUserCommand
+AcceptInvitationCommand,"Complete registration from invitation token.",1,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,InviteUserCommand
+LoginCommand,"Email/password login with tenant context.",1,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,CreateUserEntity
+GenerateJwtTokenService,"JWT with tenant_id, user_id, role claims. Configurable expiry.",1,Todo,3,backend;security,Sprint 2,[EPIC] Identity & RBAC,LoginCommand
+GenerateRefreshTokenService,"Refresh token generation, storage, rotation.",1,Todo,3,backend;security,Sprint 2,[EPIC] Identity & RBAC,GenerateJwtTokenService
+RefreshTokenCommand,"Rotate refresh token, issue new access token.",1,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,GenerateRefreshTokenService
+RevokeRefreshTokenCommand,"Logout: revoke refresh token in DB + Redis.",1,Todo,2,backend,Sprint 2,[EPIC] Identity & RBAC,RefreshTokenCommand
+LoginAttemptTracker,"Redis-backed failed attempt counter with lockout policy.",1,Todo,3,backend;security,Sprint 2,[EPIC] Identity & RBAC,ConfigureRedisConnection
+ForgotPasswordCommand,"Generate reset token, publish PasswordResetRequestedEvent.",2,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,CreateUserEntity
+ResetPasswordCommand,"Validate token, update password, revoke all sessions.",2,Todo,3,backend,Sprint 2,[EPIC] Identity & RBAC,ForgotPasswordCommand
+ChangePasswordCommand,"Authenticated user changes password with current password check.",2,Todo,2,backend,Sprint 2,[EPIC] Identity & RBAC,LoginCommand
+LoginEndpoint,"POST /api/v1/auth/login",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,LoginCommand
+RefreshTokenEndpoint,"POST /api/v1/auth/refresh",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,RefreshTokenCommand
+LogoutEndpoint,"POST /api/v1/auth/logout",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,RevokeRefreshTokenCommand
+RegisterUserEndpoint,"POST /api/v1/auth/register",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,RegisterUserCommand
+InviteUserEndpoint,"POST /api/v1/users/invite",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,InviteUserCommand
+GetCurrentUserEndpoint,"GET /api/v1/auth/me",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,LoginCommand
+JwtTokenGenerationTest,"Unit test: token contains correct claims.",1,Todo,2,testing,Sprint 2,[EPIC] Identity & RBAC,GenerateJwtTokenService
+RefreshTokenRotationTest,"Integration test: old refresh token invalid after rotation.",1,Todo,2,testing,Sprint 2,[EPIC] Identity & RBAC,RefreshTokenCommand
+AccountLockoutTest,"Verify lockout after N failed attempts.",1,Todo,2,testing,Sprint 2,[EPIC] Identity & RBAC,LoginAttemptTracker
+DefinePermissionCatalog,"Static catalog: {module}.{resource}.{action} for all MVP modules.",1,Todo,3,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,CreateSolutionStructure
+CreatePermissionsTableMigration,"permissions, roles, role_permissions, user_roles tables.",1,Todo,2,database;rbac,Sprint 2,[EPIC] Identity & RBAC,DefinePermissionCatalog
+SeedPermissionsCommand,"Idempotent permission seed on startup.",1,Todo,2,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,CreatePermissionsTableMigration
+CreateRoleEntity,"Role entity with IsSystem flag to protect default roles.",1,Todo,2,backend,Sprint 2,[EPIC] Identity & RBAC,CreatePermissionsTableMigration
+CreateRoleCommand,"Create custom role with name + description.",1,Todo,2,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,CreateRoleEntity
+AssignPermissionsToRoleCommand,"Bulk assign permissions to role.",1,Todo,3,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,CreateRoleCommand
+AssignRoleToUserCommand,"Assign role to user with optional scope (branch/class).",1,Todo,3,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,CreateRoleCommand
+PermissionResolverService,"Resolve effective permissions for user. Cache in Redis.",1,Todo,5,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,AssignPermissionsToRoleCommand;CreateICacheService
+CreateAuthorizationBehavior,"MediatR pipeline: check [RequirePermission] before handler.",1,Todo,3,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,PermissionResolverService
+ScopeResolverService,"Filter data access by assigned scope (tenant/branch/class).",1,Todo,5,backend;rbac,Sprint 2,[EPIC] Identity & RBAC,AssignRoleToUserCommand
+SeedDefaultRolesMigration,"Admin, Teacher, Accountant, Parent, Student default roles.",1,Todo,2,database;rbac,Sprint 2,[EPIC] Identity & RBAC,SeedPermissionsCommand
+ListRolesEndpoint,"GET /api/v1/roles",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,CreateRoleCommand
+CreateRoleEndpoint,"POST /api/v1/roles",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,CreateRoleCommand
+AssignPermissionsEndpoint,"PUT /api/v1/roles/{id}/permissions",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,AssignPermissionsToRoleCommand
+AssignUserRoleEndpoint,"POST /api/v1/users/{id}/roles",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,AssignRoleToUserCommand
+GetUserPermissionsEndpoint,"GET /api/v1/users/{id}/permissions",1,Todo,1,api,Sprint 2,[EPIC] Identity & RBAC,PermissionResolverService
+ScopeResolverUnitTest,"Unit test: class-scoped teacher sees only assigned class.",1,Todo,2,testing;rbac,Sprint 2,[EPIC] Identity & RBAC,ScopeResolverService
+CreateAuditLogEntity,"audit_logs: append-only with entity_type, entity_id, action, before/after JSON.",1,Todo,2,backend;audit,Sprint 2,[EPIC] Audit & Compliance,DefineBaseEntity
+CreateAuditLogsTableMigration,"Partition-ready audit_logs table with indexes.",1,Todo,2,database;audit,Sprint 2,[EPIC] Audit & Compliance,CreateAuditLogEntity
+AuditLogService,"IAuditService implementation: write audit entries.",1,Todo,3,backend;audit,Sprint 2,[EPIC] Audit & Compliance,CreateAuditLogEntity
+CreateAuditBehavior,"MediatR pipeline: auto-audit all ICommand implementations.",1,Todo,3,backend;audit,Sprint 2,[EPIC] Audit & Compliance,AuditLogService;RegisterMediatRPipeline
+EntityChangeCaptureInterceptor,"EF Core interceptor: capture before/after on Update.",1,Todo,3,backend;audit,Sprint 2,[EPIC] Audit & Compliance,AuditLogService
+ListAuditLogsEndpoint,"GET /api/v1/audit-logs with filters (date, entity, user).",2,Todo,2,api;audit,Sprint 2,[EPIC] Audit & Compliance,AuditLogService
+AuditLogCaptureIntegrationTest,"Verify audit entry created on student create/update.",1,Todo,2,testing;audit,Sprint 2,[EPIC] Audit & Compliance,CreateAuditBehavior
+CreateAngularWorkspace,"Angular 19 standalone workspace with core/shared/features structure.",2,Todo,3,frontend,Sprint 2,[EPIC] Admin Web App,,
+DefineEnvironmentConfigService,"Runtime API base URL from environment files.",2,Todo,1,frontend,Sprint 2,[EPIC] Admin Web App,CreateAngularWorkspace
+CreateHttpInterceptorChain,"Auth token, tenant header, error handling interceptors.",2,Todo,3,frontend,Sprint 2,[EPIC] Admin Web App,CreateAngularWorkspace
+LoginPageComponent,"Email/password login form with error display.",2,Todo,3,frontend,Sprint 2,[EPIC] Admin Web App,CreateHttpInterceptorChain
+AuthService,"Token storage, refresh logic, logout.",2,Todo,3,frontend,Sprint 2,[EPIC] Admin Web App,LoginPageComponent
+AuthGuard,"Route protection based on authentication state.",2,Todo,2,frontend,Sprint 2,[EPIC] Admin Web App,AuthService
+TokenRefreshInterceptor,"Auto-refresh expired access tokens.",2,Todo,3,frontend,Sprint 2,[EPIC] Admin Web App,AuthService
+CreateTenantCommand,"Super-admin creates new tenant with slug + plan.",1,Todo,3,backend,Sprint 3,[EPIC] Institution Management,CreateTenantsTableMigration
+TenantProvisioningService,"Creates tenant + default roles + admin user atomically.",1,Todo,5,backend,Sprint 3,[EPIC] Institution Management,CreateTenantCommand;SeedDefaultRolesMigration
+SuspendTenantCommand,"Suspend tenant: block logins, preserve data.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateTenantCommand
+CreateTenantEndpoint,"POST /api/v1/tenants (super-admin only).",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateTenantCommand
+GetCurrentTenantEndpoint,"GET /api/v1/tenants/current",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateTenantCommand
+TenantProvisioningIntegrationTest,"End-to-end: create tenant, login as admin, verify isolation.",1,Todo,3,testing,Sprint 3,[EPIC] Institution Management,TenantProvisioningService
+CreateAcademicYearEntity,"academic_years + terms entities.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,DefineBaseEntity
+CreateAcademicYearsTableMigration,"academic_years, terms tables.",1,Todo,2,database,Sprint 3,[EPIC] Institution Management,CreateAcademicYearEntity
+CreateAcademicYearCommand,"Create academic year with start/end dates.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateAcademicYearEntity
+SetCurrentAcademicYearCommand,"Mark one year as current per tenant.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateAcademicYearCommand
+AcademicYearOverlapValidator,"Prevent overlapping academic year date ranges.",1,Todo,2,backend;validation,Sprint 3,[EPIC] Institution Management,CreateAcademicYearCommand
+CreateGradeEntity,"grades, classes, sections entities with hierarchy.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateAcademicYearEntity
+CreateGradesTableMigration,"grades, classes, sections, class_subjects tables.",1,Todo,3,database,Sprint 3,[EPIC] Institution Management,CreateGradeEntity
+CreateGradeCommand,"Create grade level (e.g. Grade 1).",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateGradeEntity
+CreateClassCommand,"Create class under grade with capacity.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateGradeCommand
+CreateSectionCommand,"Create section under class.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateClassCommand
+AssignClassTeacherCommand,"Assign staff member as class teacher.",1,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateClassCommand
+CreateSubjectEntity,"subjects + class_subjects mapping.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateGradeEntity
+CreateSubjectCommand,"Create subject with code and name.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateSubjectEntity
+AssignSubjectToClassCommand,"Map subject to class for curriculum.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateSubjectCommand
+CreateStaffEntity,"staff profiles linked to user accounts.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateUserEntity
+CreateStaffCommand,"Create staff profile with designation.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateStaffEntity
+LinkStaffToUserCommand,"Link existing staff record to user account.",2,Todo,2,backend,Sprint 3,[EPIC] Institution Management,CreateStaffCommand
+ListAcademicYearsEndpoint,"GET /api/v1/academic-years",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateAcademicYearCommand
+CreateAcademicYearEndpoint,"POST /api/v1/academic-years",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateAcademicYearCommand
+ListClassesEndpoint,"GET /api/v1/classes with grade filter.",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateClassCommand
+CreateClassEndpoint,"POST /api/v1/classes",1,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateClassCommand
+ListStaffEndpoint,"GET /api/v1/staff",2,Todo,1,api,Sprint 3,[EPIC] Institution Management,CreateStaffCommand
+AppShellLayoutComponent,"Admin layout: sidebar, topbar, content area.",2,Todo,5,frontend,Sprint 3,[EPIC] Admin Web App,AuthGuard
+SidebarNavigationComponent,"Role-filtered navigation menu.",2,Todo,3,frontend,Sprint 3,[EPIC] Admin Web App,AppShellLayoutComponent;PermissionResolverService
+PermissionGuard,"Route-level permission check.",2,Todo,2,frontend,Sprint 3,[EPIC] Admin Web App,AuthGuard
+HasPermissionDirective,"Template *hasPermission directive.",2,Todo,2,frontend,Sprint 3,[EPIC] Admin Web App,PermissionGuard
+AcademicYearListComponent,"List + create/edit academic years.",2,Todo,3,frontend,Sprint 3,[EPIC] Admin Web App,AppShellLayoutComponent
+GradeClassTreeComponent,"Tree view: grades > classes > sections.",2,Todo,5,frontend,Sprint 3,[EPIC] Admin Web App,AppShellLayoutComponent
+ClassFormDialogComponent,"Create/edit class dialog.",2,Todo,3,frontend,Sprint 3,[EPIC] Admin Web App,GradeClassTreeComponent
+StaffListPageComponent,"Staff list with AG Grid.",2,Todo,3,frontend,Sprint 3,[EPIC] Admin Web App,AppShellLayoutComponent
+RoleListPageComponent,"Role management with permission matrix.",2,Todo,5,frontend,Sprint 3,[EPIC] Admin Web App,AppShellLayoutComponent
+PermissionMatrixComponent,"Checkbox grid for role permission assignment.",2,Todo,5,frontend,Sprint 3,[EPIC] Admin Web App,RoleListPageComponent
+DataTableWrapperComponent,"Shared AG Grid wrapper with pagination, sorting, export.",2,Todo,3,frontend,Sprint 3,[EPIC] Admin Web App,CreateAngularWorkspace
+CreateStudentEntity,"students + student_enrollments entities.",1,Todo,3,backend,Sprint 4,[EPIC] Student Management,CreateGradeEntity
+CreateStudentsTableMigration,"students, student_enrollments, admission_number unique index.",1,Todo,3,database,Sprint 4,[EPIC] Student Management,CreateStudentEntity
+CreateStudentCommand,"Create student with admission number auto-generation.",1,Todo,3,backend,Sprint 4,[EPIC] Student Management,CreateStudentEntity
+UpdateStudentCommand,"Update student profile fields.",1,Todo,2,backend,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+DeleteStudentCommand,"Soft delete student and deactivate enrollments.",1,Todo,2,backend,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+ListStudentsQuery,"Paginated list with search, grade/class filters, scope enforcement.",1,Todo,5,backend,Sprint 4,[EPIC] Student Management,CreateStudentCommand;ScopeResolverService
+GetStudentByIdQuery,"Single student with enrollment and guardian summary.",1,Todo,2,backend,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+CreateStudentValidator,"Age, admission number unique, required fields.",1,Todo,2,backend;validation,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+EnrollStudentCommand,"Enroll student in class/section for academic year.",1,Todo,3,backend,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+EnrollmentClassCapacityValidator,"Reject enrollment when class at capacity.",1,Todo,2,backend;validation,Sprint 4,[EPIC] Student Management,EnrollStudentCommand
+CreateGuardianEntity,"guardians + student_guardians join entity.",1,Todo,2,backend,Sprint 4,[EPIC] Student Management,CreateStudentEntity
+CreateGuardianCommand,"Create guardian profile.",1,Todo,2,backend,Sprint 4,[EPIC] Student Management,CreateGuardianEntity
+LinkGuardianToStudentCommand,"Link guardian with relationship type (father/mother/etc).",1,Todo,3,backend,Sprint 4,[EPIC] Student Management,CreateGuardianCommand
+GuardianLinkedDomainEvent,"Event: trigger parent portal invitation notification.",2,Todo,1,backend;events,Sprint 4,[EPIC] Student Management,LinkGuardianToStudentCommand
+StudentAdmittedDomainEvent,"Event: trigger fee account creation (Phase 2 hook).",2,Todo,1,backend;events,Sprint 4,[EPIC] Student Management,EnrollStudentCommand
+CreateStudentEndpoint,"POST /api/v1/students",1,Todo,1,api,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+UpdateStudentEndpoint,"PUT /api/v1/students/{id}",1,Todo,1,api,Sprint 4,[EPIC] Student Management,UpdateStudentCommand
+DeleteStudentEndpoint,"DELETE /api/v1/students/{id}",1,Todo,1,api,Sprint 4,[EPIC] Student Management,DeleteStudentCommand
+ListStudentsEndpoint,"GET /api/v1/students",1,Todo,1,api,Sprint 4,[EPIC] Student Management,ListStudentsQuery
+GetStudentEndpoint,"GET /api/v1/students/{id}",1,Todo,1,api,Sprint 4,[EPIC] Student Management,GetStudentByIdQuery
+EnrollStudentEndpoint,"POST /api/v1/students/{id}/enroll",1,Todo,1,api,Sprint 4,[EPIC] Student Management,EnrollStudentCommand
+CreateGuardianEndpoint,"POST /api/v1/guardians",1,Todo,1,api,Sprint 4,[EPIC] Student Management,CreateGuardianCommand
+LinkGuardianEndpoint,"POST /api/v1/students/{id}/guardians",1,Todo,1,api,Sprint 4,[EPIC] Student Management,LinkGuardianToStudentCommand
+CreateStudentCommandHandlerTest,"Unit test: valid create returns Result with Id.",1,Todo,2,testing,Sprint 4,[EPIC] Student Management,CreateStudentCommand
+StudentScopeFilterTest,"Integration test: teacher sees only scoped students.",1,Todo,3,testing,Sprint 4,[EPIC] Student Management,ListStudentsQuery
+LinkGuardianIntegrationTest,"Integration test: guardian linked, audit logged.",1,Todo,2,testing,Sprint 4,[EPIC] Student Management,LinkGuardianToStudentCommand
+StudentListPageComponent,"AG Grid student list with filters and search.",2,Todo,5,frontend,Sprint 4,[EPIC] Admin Web App,DataTableWrapperComponent
+StudentCreateEditPageComponent,"Student form with enrollment section.",2,Todo,5,frontend,Sprint 4,[EPIC] Admin Web App,StudentListPageComponent
+StudentDetailPageComponent,"Student profile tabs: info, guardians, enrollment.",2,Todo,5,frontend,Sprint 4,[EPIC] Admin Web App,StudentListPageComponent
+GuardianFormComponent,"Create/edit guardian dialog.",2,Todo,3,frontend,Sprint 4,[EPIC] Admin Web App,StudentDetailPageComponent
+StudentGuardianListComponent,"Guardian list on student detail with link action.",2,Todo,3,frontend,Sprint 4,[EPIC] Admin Web App,StudentDetailPageComponent
+CreateAttendanceRecordEntity,"attendance_records + attendance_sessions entities.",1,Todo,2,backend,Sprint 5,[EPIC] Attendance,CreateStudentEntity
+CreateAttendanceRecordsTableMigration,"Unique index: tenant_id + class_id + date + student_id.",1,Todo,2,database,Sprint 5,[EPIC] Attendance,CreateAttendanceRecordEntity
+MarkAttendanceCommand,"Bulk upsert attendance for class + date.",1,Todo,5,backend,Sprint 5,[EPIC] Attendance,CreateAttendanceRecordEntity;ScopeResolverService
+UpdateAttendanceRecordCommand,"Edit single record within edit window policy.",1,Todo,3,backend,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+GetClassAttendanceQuery,"Get all student attendance for class on date.",1,Todo,2,backend,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+GetStudentAttendanceQuery,"Student attendance history with date range.",1,Todo,2,backend,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+AttendanceEditWindowPolicy,"Same-day edit only (configurable per tenant).",1,Todo,2,backend,Sprint 5,[EPIC] Attendance,UpdateAttendanceRecordCommand
+AttendanceMarkedDomainEvent,"Event: notify parents of absent students.",1,Todo,1,backend;events,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+MarkAttendanceValidator,"Date not in future, students enrolled in class.",1,Todo,2,backend;validation,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+MarkAttendanceEndpoint,"POST /api/v1/attendance/mark",1,Todo,1,api,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+GetClassAttendanceEndpoint,"GET /api/v1/attendance/class/{classId}/date/{date}",1,Todo,1,api,Sprint 5,[EPIC] Attendance,GetClassAttendanceQuery
+UpdateAttendanceRecordEndpoint,"PUT /api/v1/attendance/{id}",1,Todo,1,api,Sprint 5,[EPIC] Attendance,UpdateAttendanceRecordCommand
+GetStudentAttendanceEndpoint,"GET /api/v1/attendance/student/{studentId}",1,Todo,1,api,Sprint 5,[EPIC] Attendance,GetStudentAttendanceQuery
+MarkAttendanceCommandHandlerTest,"Unit test: bulk mark creates/updates records.",1,Todo,2,testing,Sprint 5,[EPIC] Attendance,MarkAttendanceCommand
+AttendanceEditWindowPolicyTest,"Unit test: reject edit outside window.",1,Todo,2,testing,Sprint 5,[EPIC] Attendance,AttendanceEditWindowPolicy
+AttendanceMarkingPageComponent,"Daily marking UI: class selector, date picker, student rows.",2,Todo,8,frontend,Sprint 5,[EPIC] Admin Web App,AppShellLayoutComponent
+AttendanceStudentRowComponent,"Present/Absent/Late toggle per student row.",2,Todo,3,frontend,Sprint 5,[EPIC] Admin Web App,AttendanceMarkingPageComponent
+CreateFeeCategoryEntity,"fee_categories, fee_structures, fee_structure_items entities.",1,Todo,3,backend,Sprint 5,[EPIC] Fees Management,CreateAcademicYearEntity
+CreateFeeStructuresTableMigration,"fee structures + class fee assignments.",1,Todo,2,database,Sprint 5,[EPIC] Fees Management,CreateFeeCategoryEntity
+CreateFeeStructureCommand,"Define fee structure with line items.",1,Todo,3,backend,Sprint 5,[EPIC] Fees Management,CreateFeeCategoryEntity
+AssignFeeStructureToClassCommand,"Assign structure to class for academic year.",1,Todo,2,backend,Sprint 5,[EPIC] Fees Management,CreateFeeStructureCommand
+CreateFeeInvoiceEntity,"fee_invoices + fee_invoice_items + student_fee_accounts.",1,Todo,3,backend,Sprint 5,[EPIC] Fees Management,CreateStudentEntity
+CreateFeeInvoicesTableMigration,"Invoices, items, payments, receipts tables.",1,Todo,3,database,Sprint 5,[EPIC] Fees Management,CreateFeeInvoiceEntity
+GenerateFeeInvoicesCommand,"Bulk generate invoices for class/term.",1,Todo,5,backend,Sprint 5,[EPIC] Fees Management,CreateFeeInvoiceEntity;AssignFeeStructureToClassCommand
+ListFeeInvoicesQuery,"Paginated invoice list with status filters.",1,Todo,2,backend,Sprint 5,[EPIC] Fees Management,GenerateFeeInvoicesCommand
+CreateFeeStructureEndpoint,"POST /api/v1/fees/structures",1,Todo,1,api,Sprint 5,[EPIC] Fees Management,CreateFeeStructureCommand
+GenerateFeeInvoicesEndpoint,"POST /api/v1/fees/invoices/generate",1,Todo,1,api,Sprint 5,[EPIC] Fees Management,GenerateFeeInvoicesCommand
+ListFeeInvoicesEndpoint,"GET /api/v1/fees/invoices",1,Todo,1,api,Sprint 5,[EPIC] Fees Management,ListFeeInvoicesQuery
+FeeStructureListComponent,"Fee structure management UI.",2,Todo,5,frontend,Sprint 5,[EPIC] Admin Web App,AppShellLayoutComponent
+GenerateInvoicesWizardComponent,"Wizard: select class, term, preview, generate.",2,Todo,5,frontend,Sprint 5,[EPIC] Admin Web App,FeeStructureListComponent
+InvoiceListPageComponent,"Invoice list with status badges.",2,Todo,3,frontend,Sprint 5,[EPIC] Admin Web App,GenerateInvoicesWizardComponent
+RecordFeePaymentCommand,"Record manual payment against invoice(s).",1,Todo,5,backend,Sprint 6,[EPIC] Fees Management,GenerateFeeInvoicesCommand
+CreateFeeReceiptEntity,"Receipt with sequential receipt number.",1,Todo,2,backend,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+GetStudentFeeLedgerQuery,"Student fee ledger: invoices, payments, balance.",1,Todo,3,backend,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+GenerateFeeReceiptPdfQuery,"Generate PDF receipt for payment.",2,Todo,5,backend,Sprint 6,[EPIC] Fees Management,CreateFeeReceiptEntity
+FeePaymentReceivedDomainEvent,"Event: notification + future accounting hook.",1,Todo,1,backend;events,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+PaymentAmountNotExceedingDueValidator,"Reject overpayment.",1,Todo,2,backend;validation,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+RecordFeePaymentEndpoint,"POST /api/v1/fees/payments",1,Todo,1,api,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+GetStudentFeeLedgerEndpoint,"GET /api/v1/fees/students/{id}/ledger",1,Todo,1,api,Sprint 6,[EPIC] Fees Management,GetStudentFeeLedgerQuery
+DownloadReceiptEndpoint,"GET /api/v1/fees/payments/{id}/receipt",2,Todo,1,api,Sprint 6,[EPIC] Fees Management,GenerateFeeReceiptPdfQuery
+GetOutstandingDuesQuery,"List all outstanding dues with aging.",2,Todo,3,backend,Sprint 6,[EPIC] Fees Management,GenerateFeeInvoicesCommand
+RecordFeePaymentCommandHandlerTest,"Unit test: payment updates invoice status.",1,Todo,2,testing,Sprint 6,[EPIC] Fees Management,RecordFeePaymentCommand
+PaymentCollectionFormComponent,"Payment entry form with invoice selection.",2,Todo,5,frontend,Sprint 6,[EPIC] Admin Web App,InvoiceListPageComponent
+StudentFeeLedgerComponent,"Ledger view on student detail page.",2,Todo,3,frontend,Sprint 6,[EPIC] Admin Web App,StudentDetailPageComponent
+OutstandingDuesDashboardComponent,"Dashboard widget: total outstanding by class.",2,Todo,3,frontend,Sprint 6,[EPIC] Admin Web App,AppShellLayoutComponent
+CreateNotificationTemplateEntity,"notification_templates + notifications + deliveries.",1,Todo,2,backend,Sprint 6,[EPIC] Notifications,DefineIntegrationEventBase
+CreateNotificationsTableMigration,"Templates, notifications, preferences, device_tokens.",1,Todo,2,database,Sprint 6,[EPIC] Notifications,CreateNotificationTemplateEntity
+CreateNotificationTemplateCommand,"CRUD notification templates with placeholders.",2,Todo,3,backend,Sprint 6,[EPIC] Notifications,CreateNotificationTemplateEntity
+TemplateRendererService,"Render template with Handlebars/Liquid.",1,Todo,3,backend,Sprint 6,[EPIC] Notifications,CreateNotificationTemplateCommand
+SendNotificationCommand,"Dispatch notification to channels.",1,Todo,3,backend,Sprint 6,[EPIC] Notifications,TemplateRendererService
+EmailNotificationProvider,"SMTP email sender.",1,Todo,3,backend,Sprint 6,[EPIC] Notifications,SendNotificationCommand
+InAppNotificationProvider,"Store in-app notification for user.",1,Todo,2,backend,Sprint 6,[EPIC] Notifications,SendNotificationCommand
+NotificationEventHandler,"Subscribe to AttendanceMarked, FeePaymentReceived, GuardianLinked events.",1,Todo,5,backend;events,Sprint 6,[EPIC] Notifications,CreateOutboxPublisherBackgroundService
+NotificationDispatchJob,"Background job: process notification queue.",1,Todo,3,backend,Sprint 6,[EPIC] Notifications,SendNotificationCommand
+AttendanceAbsentNotificationHandler,"On absent mark: notify parent via email + in-app.",1,Todo,3,backend,Sprint 6,[EPIC] Notifications,NotificationEventHandler
+FeePaymentConfirmationHandler,"On payment: send receipt notification.",1,Todo,2,backend,Sprint 6,[EPIC] Notifications,NotificationEventHandler
+ListNotificationsEndpoint,"GET /api/v1/notifications/inbox",1,Todo,1,api,Sprint 6,[EPIC] Notifications,InAppNotificationProvider
+MarkNotificationReadEndpoint,"PUT /api/v1/notifications/{id}/read",2,Todo,1,api,Sprint 6,[EPIC] Notifications,InAppNotificationProvider
+NotificationBellComponent,"Topbar notification bell with unread count.",2,Todo,3,frontend,Sprint 6,[EPIC] Admin Web App,AppShellLayoutComponent
+NotificationInboxComponent,"In-app notification list page.",2,Todo,3,frontend,Sprint 6,[EPIC] Admin Web App,NotificationBellComponent
+AuditLogListPageComponent,"Audit log viewer with AG Grid filters.",2,Todo,5,frontend,Sprint 6,[EPIC] Admin Web App,DataTableWrapperComponent
+CreateFlutterMonorepoStructure,"Flutter packages: core, auth, api_client.",2,Todo,3,mobile,Sprint 6,[EPIC] Parent Mobile App,,
+DefineRiverpodProviderStructure,"Global provider scope and conventions.",2,Todo,2,mobile,Sprint 6,[EPIC] Parent Mobile App,CreateFlutterMonorepoStructure
+CreateDioClientFactory,"Dio with auth + refresh interceptors.",2,Todo,3,mobile,Sprint 6,[EPIC] Parent Mobile App,CreateFlutterMonorepoStructure
+SecureTokenStorageService,"flutter_secure_storage for tokens.",2,Todo,2,mobile,Sprint 6,[EPIC] Parent Mobile App,CreateDioClientFactory
+ParentAuthFlow,"Login, logout, token refresh screens.",2,Todo,5,mobile,Sprint 6,[EPIC] Parent Mobile App,SecureTokenStorageService
+ParentAppShell,"Bottom navigation: Home, Attendance, Fees, Notifications, Profile.",2,Todo,3,mobile,Sprint 6,[EPIC] Parent Mobile App,ParentAuthFlow
+ChildSelectorWidget,"Multi-child selector for parents with multiple children.",2,Todo,3,mobile,Sprint 6,[EPIC] Parent Mobile App,ParentAppShell
+ParentDashboardScreen,"Summary: today's attendance, fee balance, recent notifications.",2,Todo,5,mobile,Sprint 6,[EPIC] Parent Mobile App,ChildSelectorWidget
+ChildAttendanceScreen,"Monthly attendance calendar for selected child.",2,Todo,5,mobile,Sprint 6,[EPIC] Parent Mobile App,ChildSelectorWidget;GetStudentAttendanceEndpoint
+FeeSummaryScreen,"Outstanding fees and payment history.",2,Todo,5,mobile,Sprint 6,[EPIC] Parent Mobile App,ChildSelectorWidget;GetStudentFeeLedgerEndpoint
+NotificationInboxScreen,"Parent notification inbox.",2,Todo,3,mobile,Sprint 6,[EPIC] Parent Mobile App,ParentAppShell;ListNotificationsEndpoint
+ProductionDockerComposeFile,"Production compose: API, PostgreSQL, Redis, RabbitMQ, Nginx.",1,Todo,5,devops,Sprint 6,[EPIC] DevOps & Deployment,CreateDockerfileApi
+NginxReverseProxyConfig,"Reverse proxy with SSL termination.",1,Todo,3,devops,Sprint 6,[EPIC] DevOps & Deployment,ProductionDockerComposeFile
+NginxWildcardSubdomainConfig,"Wildcard subdomain for tenant routing.",1,Todo,3,devops,Sprint 6,[EPIC] DevOps & Deployment,NginxReverseProxyConfig
+HealthCheckEndpoint,"GET /health and /health/ready endpoints.",1,Todo,2,backend;devops,Sprint 6,[EPIC] DevOps & Deployment,CreateSolutionStructure
+CorrelationIdMiddleware,"Request correlation ID for distributed tracing.",2,Todo,2,backend,Sprint 6,[EPIC] DevOps & Deployment,CreateLoggingBehavior
+CdStagingDeployWorkflow,"Deploy to staging VPS on merge to develop.",2,Todo,5,devops,Sprint 6,[EPIC] DevOps & Deployment,CiBuildApiWorkflow
+CdProductionDeployWorkflow,"Deploy to production on release tag.",2,Todo,5,devops,Sprint 6,[EPIC] DevOps & Deployment,CdStagingDeployWorkflow
+CdDatabaseMigrationStep,"Run EF migrations as part of deploy pipeline.",1,Todo,3,devops,Sprint 6,[EPIC] DevOps & Deployment,CdStagingDeployWorkflow
+PostgresBackupCronScript,"Daily automated PostgreSQL backup.",2,Todo,3,devops,Sprint 6,[EPIC] DevOps & Deployment,ProductionDockerComposeFile
+ConfigureStructuredLogEnrichment,"Serilog: TenantId, UserId, CorrelationId enrichment.",2,Todo,2,devops,Sprint 6,[EPIC] DevOps & Deployment,CorrelationIdMiddleware
+MVP Integration Test Suite,"End-to-end: tenant provision > student create > mark attendance > generate invoice > record payment.",1,Todo,8,testing,Sprint 6,[EPIC] Platform Foundation,RecordFeePaymentCommand;MarkAttendanceCommand;CreateStudentCommand
+MVP Smoke Test Checklist,"Manual QA checklist for MVP release sign-off.",1,Todo,2,testing,Sprint 6,[EPIC] Platform Foundation,MVP Integration Test Suite

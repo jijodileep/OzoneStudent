@@ -1,0 +1,56 @@
+---
+description: REST API endpoint conventions and versioning
+globs: src/**/Api/**/*.cs
+alwaysApply: false
+---
+
+# API Conventions
+
+## URL Pattern
+
+```
+/api/v1/{resource}
+/api/v1/{resource}/{id}
+/api/v1/{resource}/{id}/{sub-resource}
+```
+
+## Minimal API Endpoint Pattern
+
+```csharp
+public static class StudentEndpoints
+{
+    public static void Map(IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/v1/students")
+            .WithTags("Students")
+            .RequireAuthorization();
+
+        group.MapPost("/", CreateStudentEndpoint.Handle);
+        group.MapGet("/", ListStudentsEndpoint.Handle);
+        group.MapGet("/{id:guid}", GetStudentEndpoint.Handle);
+        group.MapPut("/{id:guid}", UpdateStudentEndpoint.Handle);
+        group.MapDelete("/{id:guid}", DeleteStudentEndpoint.Handle);
+    }
+}
+```
+
+## Response Rules
+
+- Success: return DTO directly or `Results.Ok(dto)`
+- Business failure: `Results.BadRequest(problemDetails)` from `Result.Errors`
+- Not found: `Results.NotFound()`
+- Forbidden: `Results.Forbid()` — RBAC denial
+
+## Endpoint Responsibilities
+
+- Bind request → command/query → `IMediator.Send()` → map `Result` to HTTP
+- **No business logic in endpoints**
+
+## Pagination
+
+- List endpoints: `?page=1&pageSize=20&search=&sortBy=`
+- Return `{ items, totalCount, page, pageSize }`
+
+## Swagger
+
+- Every endpoint needs `.WithName()`, `.Produces<T>()`, `.ProducesProblem()`

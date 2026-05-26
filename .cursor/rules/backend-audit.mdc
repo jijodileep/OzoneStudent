@@ -1,0 +1,65 @@
+---
+description: Audit logging requirements — ALL significant actions must be logged
+globs: src/**/*.cs
+alwaysApply: false
+---
+
+# Audit Logging — Universal Policy
+
+**Rule: If it happened, it must be logged.** See `docs/universal-logging-policy.md` for full matrix.
+
+## Always Audit (Audit DB — append-only)
+
+| Category | Examples |
+|---|---|
+| **Auth** | Login, logout, failed login, password change, token refresh, lockout |
+| **RBAC** | Role/permission changes, access denied (403) |
+| **Writes** | Every command — Create, Update, Delete, BulkUpdate, StatusChange |
+| **Sensitive reads** | Student profile, fee ledger, documents, financial records |
+| **Exports** | Reports, CSV, PDF receipts, audit export |
+| **Financial** | Payments, voids, journal post/reverse — highest priority |
+| **Files** | Upload, download, delete |
+| **Events** | Published, consumed, failed, dead-lettered |
+| **Jobs** | Started, completed, failed |
+| **Super admin** | All platform/tenant lifecycle actions |
+
+## Operational Log (Serilog — every request)
+
+- All HTTP requests via `RequestLoggingMiddleware` (method, path, status, elapsed)
+- Validation failures, Result failures, exceptions
+- Never log passwords, tokens, or unmasked PII
+
+## Implementation
+
+```csharp
+// Writes — automatic via AuditBehavior on all ICommand
+[AuditCategory("Student")]
+public record UpdateStudentCommand(...) : ICommand<Result<Unit>>;
+
+// Sensitive reads — AuditReadBehavior or explicit
+[AuditRead("Student", nameof(GetStudentByIdQuery))]
+public record GetStudentByIdQuery(Guid Id) : IQuery<Result<StudentDto>>;
+
+// Access denied — in AuthorizationBehavior
+await _auditService.LogAsync(AuditAction.AccessDenied, ...);
+
+// Exports — in handler before returning file
+await _auditService.LogAsync(AuditAction.Export, entityType, filters);
+```
+
+## AuditEntry Required Fields
+
+`TenantId`, `UserId`, `Action`, `Category`, `EntityType`, `EntityId?`, `Description`, `BeforeJson?`, `AfterJson?`, `MetadataJson?`, `IpAddress`, `UserAgent`, `CorrelationId`, `Source`, `Outcome`, `CreatedAt`
+
+## Do NOT
+
+- Skip audit because "it's just a read" — if PII/financial, audit it
+- Delete or update audit records
+- Log audit writes through AuditBehavior (direct insert — loop prevention)
+- Log passwords/tokens in any log layer
+
+## Tests Required
+
+- Handler test: verify `IAuditService.LogAsync` called (writes)
+- Integration test: audit row exists after API call
+- Architecture test: all `ICommand` have audit coverage

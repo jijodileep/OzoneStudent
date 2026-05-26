@@ -1,0 +1,86 @@
+Title,Description,Priority,Status,Estimate,Labels,Project,Milestone,Parent issue,Blocked by
+CreateSolutionStructure-1.1,Run dotnet new sln -n SchoolSaaS at repo root,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,
+CreateSolutionStructure-1.2,"Create Api, Application, Domain, Infrastructure, Shared projects (net9.0)",1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.1
+CreateSolutionStructure-1.3,Set project references enforcing Clean Architecture layers,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.2
+CreateSolutionStructure-1.4,Create Modules/Platform folder scaffold,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.2
+CreateSolutionStructure-1.5,Add NuGet packages to Api (MediatR FluentValidation Serilog Swashbuckle),1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.2
+CreateSolutionStructure-1.6,Create Program.cs minimal host stub,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.5
+CreateSolutionStructure-1.7,Add Directory.Build.props with TreatWarningsAsErrors and Nullable enable,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.1
+CreateSolutionStructure-1.8,Add root .gitignore and README.md,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.1
+CreateSolutionStructure-1.9,Verify dotnet build succeeds with zero warnings,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,CreateSolutionStructure,CreateSolutionStructure-1.6;CreateSolutionStructure-1.7
+DefineResultPattern-2.1,Create Error.cs record with Code Message Field,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineResultPattern,CreateSolutionStructure-1.9
+DefineResultPattern-2.2,Create ValidationError extending Error,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineResultPattern,DefineResultPattern-2.1
+DefineResultPattern-2.3,Create non-generic Result class,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineResultPattern,DefineResultPattern-2.1
+DefineResultPattern-2.4,Create generic Result T class,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineResultPattern,DefineResultPattern-2.3
+DefineResultPattern-2.5,Add NotFound Forbidden Conflict factory methods,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineResultPattern,DefineResultPattern-2.4
+DefineResultPattern-2.6,Unit tests for Result success and failure cases,1,Todo,0.5,testing;L5,Sprint 1,MVP Phase 1,DefineResultPattern,DefineResultPattern-2.5
+DefineBaseEntity-3.1,Create ITenantEntity marker interface,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,CreateSolutionStructure-1.9
+DefineBaseEntity-3.2,Create ISoftDeletable interface,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,DefineBaseEntity-3.1
+DefineBaseEntity-3.3,Create BaseEntity abstract class with audit and soft delete fields,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,DefineBaseEntity-3.2
+DefineBaseEntity-3.4,Create AuditableEntity extending BaseEntity,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,DefineBaseEntity-3.3
+DefineBaseEntity-3.5,Create IAggregateRoot and IDomainEvent interfaces,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,DefineBaseEntity-3.3
+DefineBaseEntity-3.6,Add BaseEntity constructor with Id and CreatedAt defaults,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,DefineBaseEntity,DefineBaseEntity-3.3
+ConfigureEfCorePostgreSql-4.1,Add Npgsql and EFCore.NamingConventions NuGet packages,1,Todo,0.25,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,CreateSolutionStructure-1.9
+ConfigureEfCorePostgreSql-4.2,Create ApplicationDbContext in Infrastructure,1,Todo,0.5,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.1
+ConfigureEfCorePostgreSql-4.3,Configure snake_case naming convention,1,Todo,0.25,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.2
+ConfigureEfCorePostgreSql-4.4,Create IUnitOfWork and UnitOfWork implementation,1,Todo,0.5,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.2
+ConfigureEfCorePostgreSql-4.5,Create Infrastructure DependencyInjection extension,1,Todo,0.5,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.4
+ConfigureEfCorePostgreSql-4.6,Add connection string to appsettings.Development.json,1,Todo,0.25,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.5
+ConfigureEfCorePostgreSql-4.7,Register DbContext as scoped in DI,1,Todo,0.25,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.5
+ConfigureEfCorePostgreSql-4.8,Add EF design-time factory for migrations CLI,1,Todo,0.5,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.7
+ConfigureEfCorePostgreSql-4.9,Wire Infrastructure DI from Program.cs,1,Todo,0.25,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.8
+ConfigureEfCorePostgreSql-4.10,Verify initial migration applies to local PostgreSQL,1,Todo,0.5,backend;database;L5,Sprint 1,MVP Phase 1,ConfigureEfCorePostgreSql,ConfigureEfCorePostgreSql-4.9
+DefineITenantContext-7.1,Create ITenantContext interface,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,DefineITenantContext,DefineBaseEntity-3.3
+DefineITenantContext-7.2,Create scoped TenantContext implementation,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,DefineITenantContext,DefineITenantContext-7.1
+DefineITenantContext-7.3,Create ITenantContextAccessor for interceptors,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,DefineITenantContext,DefineITenantContext-7.2
+DefineITenantContext-7.4,Register TenantContext as scoped in DI,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,DefineITenantContext,DefineITenantContext-7.3
+DefineITenantContext-7.5,Unit test default context has null TenantId,1,Todo,0.25,testing;L5,Sprint 1,MVP Phase 1,DefineITenantContext,DefineITenantContext-7.4
+ImplementTenantContextMiddleware-8.1,Create TenantContextMiddleware in Api/Middleware,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,DefineITenantContext-7.4
+ImplementTenantContextMiddleware-8.2,Resolve tenant from JWT tenant_id claim,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.1
+ImplementTenantContextMiddleware-8.3,Add X-Tenant-Id header fallback for dev only,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.2
+ImplementTenantContextMiddleware-8.4,Populate UserId from sub claim,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.2
+ImplementTenantContextMiddleware-8.5,Skip tenant resolution for health swagger login paths,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.1
+ImplementTenantContextMiddleware-8.6,Return 401 for missing tenant on authenticated requests,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.2
+ImplementTenantContextMiddleware-8.7,Register middleware after Authentication before Authorization,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,ImplementTenantContextMiddleware,ImplementTenantContextMiddleware-8.6
+CreateTenantQueryFilter-9.1,Create ExcludeFromTenantFilter attribute,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,ConfigureEfCorePostgreSql-4.10;DefineITenantContext-7.4
+CreateTenantQueryFilter-9.2,Apply global query filter for ITenantEntity types,1,Todo,1,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,CreateTenantQueryFilter-9.1
+CreateTenantQueryFilter-9.3,Include IsDeleted soft delete in filter expression,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,CreateTenantQueryFilter-9.2
+CreateTenantQueryFilter-9.4,Use ITenantContextAccessor in DbContext for filter,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,CreateTenantQueryFilter-9.2
+CreateTenantQueryFilter-9.5,Exclude Tenant entity from tenant filter,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,CreateTenantQueryFilter-9.1
+CreateTenantQueryFilter-9.6,Verify SQL contains tenant_id in WHERE clause,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantQueryFilter,CreateTenantQueryFilter-9.4
+CreateTenantSaveChangesInterceptor-10.1,Create TenantSaveChangesInterceptor class,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantQueryFilter-9.6
+CreateTenantSaveChangesInterceptor-10.2,Auto-stamp TenantId on Added ITenantEntity entries,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantSaveChangesInterceptor-10.1
+CreateTenantSaveChangesInterceptor-10.3,Throw CrossTenantWriteException on TenantId mismatch,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantSaveChangesInterceptor-10.2
+CreateTenantSaveChangesInterceptor-10.4,Stamp CreatedAt UpdatedAt CreatedBy UpdatedBy on save,1,Todo,0.5,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantSaveChangesInterceptor-10.1
+CreateTenantSaveChangesInterceptor-10.5,Register interceptor in DbContext options,1,Todo,0.25,backend;tenancy;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantSaveChangesInterceptor-10.4
+CreateTenantSaveChangesInterceptor-10.6,Unit test TenantId auto-stamped on insert,1,Todo,0.5,testing;L5,Sprint 1,MVP Phase 1,CreateTenantSaveChangesInterceptor,CreateTenantSaveChangesInterceptor-10.5
+RegisterMediatRPipeline-11.1,Add MediatR to Application project,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,CreateSolutionStructure-1.9
+RegisterMediatRPipeline-11.2,Create Application DependencyInjection AddApplication extension,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,RegisterMediatRPipeline-11.1
+RegisterMediatRPipeline-11.3,Register MediatR scanning all module assemblies,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,RegisterMediatRPipeline-11.2
+RegisterMediatRPipeline-11.4,Create ICommand and IQuery marker interfaces,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,RegisterMediatRPipeline-11.2
+RegisterMediatRPipeline-11.5,Wire AddApplication from Program.cs,1,Todo,0.25,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,RegisterMediatRPipeline-11.3
+RegisterMediatRPipeline-11.6,Create PingQuery smoke test endpoint,1,Todo,0.5,backend;foundation;L5,Sprint 1,MVP Phase 1,RegisterMediatRPipeline,RegisterMediatRPipeline-11.5
+CreateValidationBehavior-12.1,Add FluentValidation.DependencyInjectionExtensions,1,Todo,0.25,backend;validation;L5,Sprint 1,MVP Phase 1,CreateValidationBehavior,RegisterMediatRPipeline-11.6
+CreateValidationBehavior-12.2,Create ValidationBehavior pipeline class,1,Todo,0.5,backend;validation;L5,Sprint 1,MVP Phase 1,CreateValidationBehavior,CreateValidationBehavior-12.1
+CreateValidationBehavior-12.3,Return Result.Failure with ValidationErrors on invalid input,1,Todo,0.5,backend;validation;L5,Sprint 1,MVP Phase 1,CreateValidationBehavior,CreateValidationBehavior-12.2
+CreateValidationBehavior-12.4,Register ValidationBehavior first in MediatR pipeline,1,Todo,0.25,backend;validation;L5,Sprint 1,MVP Phase 1,CreateValidationBehavior,CreateValidationBehavior-12.3
+CreateValidationBehavior-12.5,Test handler not called when validation fails,1,Todo,0.5,testing;L5,Sprint 1,MVP Phase 1,CreateValidationBehavior,CreateValidationBehavior-12.4
+CreateOutboxPublisherBackgroundService-22.1,Add RabbitMQ.Client NuGet package,1,Todo,0.25,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,ImplementOutboxSaveChangesInterceptor-21.6
+CreateOutboxPublisherBackgroundService-22.2,Create RabbitMqOptions config section,1,Todo,0.25,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.1
+CreateOutboxPublisherBackgroundService-22.3,Create RabbitMqConnectionFactory with retry,1,Todo,0.5,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.2
+CreateOutboxPublisherBackgroundService-22.4,Create OutboxPublisherBackgroundService BackgroundService,1,Todo,1,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.3
+CreateOutboxPublisherBackgroundService-22.5,Poll and publish unprocessed outbox batch of 50,1,Todo,1,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.4
+CreateOutboxPublisherBackgroundService-22.6,Mark ProcessedAt on success increment RetryCount on failure,1,Todo,0.5,backend;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.5
+CreateOutboxPublisherBackgroundService-22.7,Integration test with Testcontainers RabbitMQ,1,Todo,1,testing;events;L5,Sprint 1,MVP Phase 1,CreateOutboxPublisherBackgroundService,CreateOutboxPublisherBackgroundService-22.6
+TenantIsolationIntegrationTest-27.1,Create test tenant-scoped entity and migration,1,Todo,0.5,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,CreateTenantQueryFilter-9.6
+TenantIsolationIntegrationTest-27.2,Seed tenant A and B with test data,1,Todo,0.5,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,TenantIsolationIntegrationTest-27.1
+TenantIsolationIntegrationTest-27.3,Test query returns only current tenant data,1,Todo,0.5,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,TenantIsolationIntegrationTest-27.2
+TenantIsolationIntegrationTest-27.4,Test cross-tenant update blocked,1,Todo,0.5,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,TenantIsolationIntegrationTest-27.3
+TenantIsolationIntegrationTest-27.5,Test wrong TenantId insert throws CrossTenantWriteException,1,Todo,0.5,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,CreateTenantSaveChangesInterceptor-10.6
+TenantIsolationIntegrationTest-27.6,Add test to CI required checks,1,Todo,0.25,testing;tenancy;L5,Sprint 1,MVP Phase 1,TenantIsolationIntegrationTest,TenantIsolationIntegrationTest-27.5
+CiBuildApiWorkflow-30.1,Create .github/workflows/ci-api.yml,1,Todo,0.5,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CreateTestProjectStructure-25.6
+CiBuildApiWorkflow-30.2,Configure PR trigger for main and develop branches,1,Todo,0.25,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CiBuildApiWorkflow-30.1
+CiBuildApiWorkflow-30.3,Add PostgreSQL Redis RabbitMQ GitHub Actions services,1,Todo,0.5,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CiBuildApiWorkflow-30.2
+CiBuildApiWorkflow-30.4,Run dotnet build and dotnet test in CI,1,Todo,0.5,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CiBuildApiWorkflow-30.3
+CiBuildApiWorkflow-30.5,Cache NuGet packages and upload test results,1,Todo,0.25,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CiBuildApiWorkflow-30.4
+CiBuildApiWorkflow-30.6,Verify CI green on test PR,1,Todo,0.5,devops;L5,Sprint 1,MVP Phase 1,CiBuildApiWorkflow,CiBuildApiWorkflow-30.5

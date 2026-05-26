@@ -1,0 +1,56 @@
+---
+description: DevOps, Docker, CI/CD, and deployment conventions
+globs: "{docker-compose*.yml,.github/**/*.yml,Dockerfile*,nginx/**/*,deploy/**/*}"
+alwaysApply: false
+---
+
+# DevOps & Deployment
+
+## Local Stack (docker-compose.yml)
+
+Services: `api`, `postgres`, `redis`, `rabbitmq`, `nginx` (optional locally)
+
+## Dockerfile
+
+- Multi-stage: `build` → `publish` → `runtime` (aspnet:9.0)
+- Non-root user in production image
+- Health check: `curl -f http://localhost:8080/health`
+
+## GitHub Actions
+
+| Workflow | Trigger | Steps |
+|---|---|---|
+| `ci-api.yml` | PR to main/develop | restore, build, unit test, arch test, integration test |
+| `ci-frontend.yml` | PR | lint, build, unit test |
+| `cd-staging.yml` | merge to develop | build image, push registry, SSH deploy, migrate, health check |
+| `cd-production.yml` | release tag | same with manual approval gate |
+
+## Deploy Steps (CD)
+
+1. Pull new Docker image
+2. Run EF migrations: `dotnet ef database update`
+3. Rolling restart API container
+4. Verify `/health/ready`
+5. Rollback on failure: previous image tag
+
+## Nginx
+
+- Wildcard subdomain: `*.yourdomain.com` → API
+- `/api/*` → API container
+- `/*` → Angular static assets
+- SSL via Certbot/Let's Encrypt
+
+## Secrets
+
+- Never commit `.env` — use GitHub Secrets + VPS env files
+- JWT secret, DB connection, SMTP, Redis password via environment variables
+
+## Backups
+
+- Daily `pg_dump` cron with 30-day retention
+- Test restore monthly
+
+## Logging
+
+- Serilog → structured JSON → Seq/Elasticsearch (staging+) or console (local)
+- Enrich: `TenantId`, `UserId`, `CorrelationId`

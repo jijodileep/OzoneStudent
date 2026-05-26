@@ -1,0 +1,50 @@
+---
+description: Clean Architecture layer rules for ASP.NET Core backend
+globs: src/**/*.cs
+alwaysApply: false
+---
+
+# Backend Clean Architecture
+
+## Layer Dependencies (strict — enforced by architecture tests)
+
+```
+Domain ← Application ← Infrastructure ← Api
+```
+
+- **Domain**: Entities, value objects, domain events, repository interfaces. No EF, no MediatR, no HTTP.
+- **Application**: Commands, queries, handlers, validators, DTOs. Depends on Domain only.
+- **Infrastructure**: EF configurations, repositories, external services, event handlers.
+- **Api**: Minimal API endpoints, middleware, DI registration. Thin — delegate to MediatR.
+
+## Module Folder Structure
+
+```
+src/Modules/{Module}/
+  Domain/
+    Entities/
+    Events/
+    Interfaces/
+  Application/
+    Commands/
+    Queries/
+    Validators/
+    DTOs/
+  Infrastructure/
+    Persistence/
+    Configurations/
+  Api/
+    Endpoints/
+```
+
+## Do NOT
+
+- Reference `Infrastructure` from `Application` or `Domain`
+- Put business logic in endpoints or EF configurations
+- Create circular module references
+- Share entities by copying — extract to Shared only if truly cross-cutting (e.g. `BaseEntity`)
+
+## Do
+
+- Register module services via `IServiceCollection` extension: `Add{Module}Module()`
+- One `DbContext` with module entity configurations in separate `IEntityTypeConfiguration<T>` classes

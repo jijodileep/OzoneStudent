@@ -1,0 +1,45 @@
+---
+description: CQRS + MediatR command and query patterns
+globs: src/**/Application/**/*.cs
+alwaysApply: false
+---
+
+# CQRS + MediatR Patterns
+
+## Command Template
+
+```csharp
+// Command — immutable record
+public record CreateStudentCommand(string FirstName, string LastName, Guid ClassId) : IRequest<Result<Guid>>;
+
+// Handler — inject ITenantContext, IAuditService, IRepository
+public class CreateStudentCommandHandler : IRequestHandler<CreateStudentCommand, Result<Guid>>
+{
+    public async Task<Result<Guid>> Handle(CreateStudentCommand request, CancellationToken ct)
+    {
+        // 1. Validate business rules
+        // 2. Create entity, stamp TenantId from ITenantContext
+        // 3. Save via IUnitOfWork
+        // 4. Raise domain event / outbox integration event
+        // 5. Return Result.Success(id)
+    }
+}
+
+// Validator — separate class
+public class CreateStudentValidator : AbstractValidator<CreateStudentCommand> { }
+```
+
+## Query Rules
+
+- Queries are **read-only** — no `SaveChanges`, no domain events.
+- Apply scope filtering via `IScopeResolver` in handler.
+- Return DTOs, never domain entities, from query handlers.
+
+## MediatR Pipeline Behaviors (already registered — do not bypass)
+
+Order: `LoggingBehavior` → `ValidationBehavior` → `AuthorizationBehavior` → `TenantBehavior` → `AuditBehavior` → Handler
+
+## IRequest vs INotification
+
+- `IRequest<Result<T>>` — commands and queries (single handler)
+- `INotification` — domain events with multiple handlers

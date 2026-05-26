@@ -1,0 +1,47 @@
+# Build
+bin/
+obj/
+out/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*~
+.idea/
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+
+# Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Docker
+docker/.env
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+secrets.json
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+logs/
+*.log

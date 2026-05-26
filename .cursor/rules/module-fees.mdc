@@ -1,0 +1,68 @@
+---
+description: Fees Management — structures, invoicing, payments, receipts
+globs: src/**/Modules/Fees/**/*
+alwaysApply: false
+---
+
+# Module: Fees Management
+
+## Scope
+
+Fee categories/structures, class assignment, invoice generation, manual payment collection, receipts, outstanding dues.
+
+## Key Entities
+
+`FeeCategory`, `FeeStructure`, `FeeStructureItem`, `ClassFeeAssignment`, `FeeInvoice`, `FeeInvoiceItem`, `FeePayment`, `FeeReceipt`, `StudentFeeAccount`
+
+## Permissions
+
+```
+fees.structure.manage
+fees.invoices.create
+fees.invoices.read
+fees.invoices.cancel
+fees.payments.collect
+fees.concessions.apply
+fees.concessions.approve
+fees.reports.read
+```
+
+## Commands (MVP)
+
+- `CreateFeeCategoryCommand`, `CreateFeeStructureCommand`, `AssignFeeStructureToClassCommand`
+- `GenerateFeeInvoicesCommand` — bulk for class/term
+- `CancelFeeInvoiceCommand`
+- `RecordFeePaymentCommand`, `VoidFeePaymentCommand`
+- `ApplyConcessionCommand`, `ApproveConcessionCommand`
+
+## Business Rules
+
+- Invoice number: `{TENANT_PREFIX}-{YEAR}-{SEQ}` — sequential, no gaps on void (mark void, don't reuse)
+- Payment amount cannot exceed outstanding balance (`PaymentAmountNotExceedingDueValidator`)
+- Duplicate payment reference rejected (`DuplicatePaymentReferenceValidator`)
+- Receipt number sequential per tenant
+- Void payment creates reversal entry, not delete
+
+## Invoice Status
+
+`Draft → Issued → PartiallyPaid → Paid | Overdue | Cancelled`
+
+## Events
+
+- `FeeInvoiceGeneratedIntegrationEvent`
+- `FeePaymentReceivedIntegrationEvent` → notification + Phase 2 accounting hook
+- `FeeOverdueIntegrationEvent` → reminder notification
+
+## Money
+
+- All amounts `decimal(18,2)`
+- MVP: manual/cash payments only — no payment gateway
+
+## Queries
+
+- `ListFeeInvoicesQuery`, `GetStudentFeeLedgerQuery`, `GetOutstandingDuesQuery`
+- `GenerateFeeReceiptPdfQuery`
+
+## Parent Scope
+
+- Parents read invoices/ledger for linked children only

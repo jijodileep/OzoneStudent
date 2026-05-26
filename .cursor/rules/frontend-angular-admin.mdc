@@ -1,0 +1,61 @@
+---
+description: Angular 19 admin portal conventions
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend — Angular Admin App
+
+## Structure
+
+```
+frontend/src/app/
+  core/           # Singleton services, guards, interceptors
+  shared/         # Reusable components, directives, pipes
+  features/       # Lazy-loaded feature modules per domain
+    students/
+    attendance/
+    fees/
+    institution/
+    settings/
+```
+
+## Standalone Components
+
+- All components standalone — no NgModules except routing convenience
+- Lazy load features: `loadComponent` or `loadChildren`
+
+## Required Patterns
+
+```typescript
+// Permission directive usage
+<button *hasPermission="'students.profile.create'">Add Student</button>
+
+// Route guard
+{ path: 'students', canActivate: [AuthGuard, PermissionGuard], data: { permission: 'students.profile.read' } }
+```
+
+## HTTP Interceptors (order matters)
+
+1. `CorrelationIdInterceptor`
+2. `AuthInterceptor` — attach Bearer token
+3. `TenantInterceptor` — attach `X-Tenant-Id` if needed
+4. `ErrorInterceptor` — map ProblemDetails to toast
+5. `TokenRefreshInterceptor` — refresh on 401
+
+## Services
+
+- One service per backend module: `StudentService`, `AttendanceService`
+- Services call API only — no business logic
+- Use signals or RxJS observables consistently (pick signals for new code in Angular 19)
+
+## AG Grid
+
+- Use shared `DataTableWrapperComponent` for all list pages
+- Standard column defs: actions column last, status as chip, dates formatted via pipe
+
+## Do NOT
+
+- Store tokens in localStorage — use sessionStorage or httpOnly cookie pattern
+- Hide buttons without backend permission enforcement (UI is UX only)
+- Put API URLs hardcoded — use `EnvironmentConfigService`

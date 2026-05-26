@@ -1,0 +1,57 @@
+---
+description: RBAC module — roles, permissions, scope assignment
+globs: src/**/Modules/{Identity,Authorization}/**/*
+alwaysApply: false
+---
+
+# Module: RBAC & Permissions
+
+## Scope
+
+Permission catalog, roles, role-permission mapping, user-role assignment, scope resolution, permission caching.
+
+## Key Entities
+
+`Permission`, `Role`, `RolePermission`, `UserRole`, `PermissionScope`
+
+## Permissions (meta — manage RBAC itself)
+
+```
+roles.create
+roles.update
+roles.delete
+roles.permissions.assign
+users.roles.assign
+permissions.read
+```
+
+## Scope Types
+
+```csharp
+public enum ScopeType { Tenant, Branch, Class, Self }
+```
+
+- `Tenant` — full tenant access (admin)
+- `Branch` — branch/campus scoped
+- `Class` — class teacher scope
+- `Self` — parent (linked children) / student (own record)
+
+## Key Services
+
+- `PermissionResolverService` — effective permissions for user (cached in Redis)
+- `ScopeResolverService` — applies scope filter to queries
+- `AuthorizationBehavior` — MediatR pipeline permission check
+
+## Default System Roles (seeded, `IsSystem = true`)
+
+`SuperAdmin`, `TenantAdmin`, `Teacher`, `Accountant`, `Parent`, `Student`
+
+## Events
+
+- `RolePermissionsChangedIntegrationEvent` → invalidate permission cache
+- `UserRoleAssignedIntegrationEvent` → invalidate user permission cache
+
+## Cache Keys
+
+- `permissions:{tenantId}:{userId}` — TTL 15 minutes
+- Invalidate on any role/permission change

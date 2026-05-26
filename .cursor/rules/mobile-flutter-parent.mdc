@@ -1,0 +1,64 @@
+---
+description: Flutter Parent App conventions (MVP)
+globs: mobile/**/*
+alwaysApply: false
+---
+
+# Mobile — Flutter Parent App (MVP)
+
+## Structure
+
+```
+mobile/
+  packages/
+    core/           # Theme, constants, utils
+    api_client/     # Dio client, interceptors, API models
+    auth/           # Auth repository, token storage
+  lib/
+    features/
+      auth/
+      dashboard/
+      attendance/
+      fees/
+      notifications/
+      profile/
+```
+
+## State Management
+
+- Riverpod 2.x — `@riverpod` code generation for providers
+- `AsyncValue` for all API loading states
+
+## Dio Interceptors
+
+1. Auth token injection
+2. Token refresh on 401
+3. Error mapping to user-friendly messages
+
+## Secure Storage
+
+- `flutter_secure_storage` for access + refresh tokens
+- Never log tokens
+
+## MVP Screens
+
+| Screen | API Dependencies |
+|---|---|
+| Login | `POST /api/v1/auth/login` |
+| Child Selector | `GET /api/v1/students?guardianId=` |
+| Dashboard | Attendance today + fee balance summary |
+| Attendance | `GET /api/v1/attendance/student/{id}` |
+| Fees | `GET /api/v1/fees/students/{id}/ledger` |
+| Notifications | `GET /api/v1/notifications/inbox` |
+
+## UI Rules
+
+- Material 3 theming
+- Pull-to-refresh on all list screens
+- Offline: show cached data with stale indicator (Phase 2 full offline)
+- Read-only MVP — no payment collection on mobile
+
+## Do NOT
+
+- Duplicate business logic from backend (validation, calculations)
+- Hardcode tenant — resolve from login response/JWT

@@ -1,0 +1,59 @@
+---
+description: Testing standards for unit, integration, and architecture tests
+globs: "{tests/**/*,**/*Tests*/**/*,*Test*.cs}"
+alwaysApply: false
+---
+
+# Testing Standards
+
+## Project Structure
+
+```
+tests/
+  SchoolSaaS.UnitTests/
+  SchoolSaaS.IntegrationTests/
+  SchoolSaaS.ArchitectureTests/
+```
+
+## Unit Tests (xUnit + FluentAssertions + NSubstitute)
+
+- One test class per handler/validator/service
+- Naming: `{Method}_{Scenario}_{ExpectedResult}`
+
+```csharp
+[Fact]
+public async Task Handle_ValidCommand_ReturnsSuccessWithId()
+{
+    // Arrange — mock IRepository, ITenantContext
+    // Act — handler.Handle(command)
+    // Assert — result.IsSuccess, result.Value != Guid.Empty
+}
+```
+
+## Integration Tests (Testcontainers)
+
+- PostgreSQL container per test collection
+- Seed tenant + admin user in fixture
+- Required per module: `TenantIsolationIntegrationTest`
+
+## Architecture Tests (NetArchTest)
+
+```csharp
+[Fact]
+public void Application_Should_Not_Reference_Infrastructure() { ... }
+
+[Fact]
+public void Commands_Should_Have_RequirePermission_Attribute() { ... }
+```
+
+## Coverage Targets (MVP)
+
+- Handlers/validators: 80%+
+- Endpoints: integration test per endpoint
+- Tenant isolation: 100% of tenant-scoped entities
+
+## Every PR Must Include
+
+- [ ] Unit test for new handler/validator
+- [ ] Integration test if DB interaction
+- [ ] Tenant isolation test if new entity
