@@ -54,6 +54,7 @@ public static class AuditCategories
 {
     public const string Auth = "Auth";
     public const string Rbac = "Rbac";
+    public const string Institution = "Institution";
     public const string Platform = "Platform";
     public const string Audit = "Audit";
 }

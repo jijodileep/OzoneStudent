@@ -30,6 +30,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
             .WithWebHostBuilder(builder =>
             {
                 builder.UseSetting("Testing:SkipDataSeed", "true");
+                builder.UseSetting("Testing:UseDistributedMemoryCache", "true");
                 builder.UseSetting("Testing:ExposeResetTokens", "true");
                 builder.UseSetting("Testing:ExposeInvitationTokens", "true");
                 builder.UseSetting("Tenancy:AllowHeaderTenantSlug", "true");

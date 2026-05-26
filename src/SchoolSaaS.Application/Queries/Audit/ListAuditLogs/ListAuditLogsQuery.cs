@@ -1,9 +1,11 @@
+using SchoolSaaS.Application.Abstractions.Audit;
 using SchoolSaaS.Application.Common;
 using SchoolSaaS.Shared.Authorization;
 
 namespace SchoolSaaS.Application.Queries.Audit.ListAuditLogs;
 
 [RequirePermission(PermissionCodes.AuditLogsRead)]
+[AuditRead(AuditCategories.Audit)]
 public sealed record ListAuditLogsQuery(
     int Page = 1,
     int PageSize = 50,

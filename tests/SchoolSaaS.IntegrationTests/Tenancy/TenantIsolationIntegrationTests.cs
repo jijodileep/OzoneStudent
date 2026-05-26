@@ -49,15 +49,12 @@ public sealed class TenantIsolationIntegrationTests : IntegrationTestBase, IAsyn
     }
 
     [Fact]
-    public async Task Update_AsTenantA_OnTenantBProbe_ThrowsCrossTenantWriteException()
+    public async Task Update_AsTenantA_ChangingTenantId_ThrowsCrossTenantWriteException()
     {
         var act = async () => await RunAsTenantAsync(_tenantAId, async db =>
         {
-            var probe = await db.TenantIsolationProbes
-                .IgnoreQueryFilters()
-                .SingleAsync(p => p.Id == _tenantBProbeId);
-
-            probe.Label = "hijacked";
+            var probe = await db.TenantIsolationProbes.SingleAsync();
+            probe.TenantId = _tenantBId;
             await db.SaveChangesAsync();
         });
 

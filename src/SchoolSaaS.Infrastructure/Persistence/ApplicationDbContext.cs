@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolSaaS.Domain.Common;
 using SchoolSaaS.Domain.Audit;
 using SchoolSaaS.Domain.Identity;
+using SchoolSaaS.Domain.Institution;
 using SchoolSaaS.Domain.Platform;
 using SchoolSaaS.Domain.Platform.Outbox;
 using SchoolSaaS.Domain.Rbac;
@@ -50,6 +51,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserRole> UserRoles => Set<UserRole>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    public DbSet<AcademicYear> AcademicYears => Set<AcademicYear>();
+
+    public DbSet<Term> Terms => Set<Term>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

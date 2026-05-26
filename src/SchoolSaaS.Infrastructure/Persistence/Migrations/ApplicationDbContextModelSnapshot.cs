@@ -471,6 +471,143 @@ namespace SchoolSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("user_profiles", (string)null);
                 });
 
+            modelBuilder.Entity("SchoolSaaS.Domain.Institution.AcademicYear", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_current");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_academic_years");
+
+                    b.HasIndex("TenantId", "IsCurrent")
+                        .HasDatabaseName("ix_academic_years_tenant_id_is_current");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_academic_years_tenant_id_name");
+
+                    b.ToTable("academic_years", (string)null);
+                });
+
+            modelBuilder.Entity("SchoolSaaS.Domain.Institution.Term", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AcademicYearId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("academic_year_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_terms");
+
+                    b.HasIndex("AcademicYearId")
+                        .HasDatabaseName("ix_terms_academic_year_id");
+
+                    b.HasIndex("TenantId", "AcademicYearId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_terms_tenant_id_academic_year_id_name");
+
+                    b.HasIndex("TenantId", "AcademicYearId", "SortOrder")
+                        .HasDatabaseName("ix_terms_tenant_id_academic_year_id_sort_order");
+
+                    b.ToTable("terms", (string)null);
+                });
+
             modelBuilder.Entity("SchoolSaaS.Domain.Platform.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -861,6 +998,18 @@ namespace SchoolSaaS.Infrastructure.Persistence.Migrations
                     b.ToTable("user_roles", (string)null);
                 });
 
+            modelBuilder.Entity("SchoolSaaS.Domain.Institution.Term", b =>
+                {
+                    b.HasOne("SchoolSaaS.Domain.Institution.AcademicYear", "AcademicYear")
+                        .WithMany("Terms")
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_terms_academic_years_academic_year_id");
+
+                    b.Navigation("AcademicYear");
+                });
+
             modelBuilder.Entity("SchoolSaaS.Domain.Rbac.RolePermission", b =>
                 {
                     b.HasOne("SchoolSaaS.Domain.Rbac.Permission", "Permission")
@@ -892,6 +1041,11 @@ namespace SchoolSaaS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_user_roles_roles_role_id");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("SchoolSaaS.Domain.Institution.AcademicYear", b =>
+                {
+                    b.Navigation("Terms");
                 });
 #pragma warning restore 612, 618
         }

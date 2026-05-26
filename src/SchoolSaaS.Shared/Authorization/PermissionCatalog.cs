@@ -32,6 +32,7 @@ public static class PermissionCatalog
 
         // Institution / tenant provisioning
         new("institution.tenant.create", "Create and provision a new tenant", "institution"),
+        new("institution.academic-years.manage", "Manage academic years and terms", "institution"),
     ];
 
     public sealed record PermissionDefinition(string Code, string Name, string Module);

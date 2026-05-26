@@ -16,6 +16,7 @@ public sealed class LoginCommandHandler(
     IJwtTokenService jwtTokenService,
     IRefreshTokenService refreshTokenService,
     IPermissionResolver permissionResolver,
+    ILoginAttemptTracker loginAttemptTracker,
     IAuditService auditService) : IRequestHandler<LoginCommand, Result<LoginResult>>
 {
     public async Task<Result<LoginResult>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -30,10 +31,27 @@ public sealed class LoginCommandHandler(
         var tenantId = tenantContext.TenantId.Value;
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
+        if (await loginAttemptTracker.IsLockedOutAsync(tenantId, normalizedEmail, cancellationToken))
+        {
+            await auditService.LogAsync(
+                new AuditEntry(
+                    AuditActions.LoginFailed,
+                    AuditCategories.Auth,
+                    Description: $"Locked out login attempt for {normalizedEmail}",
+                    Outcome: AuditOutcomes.Failed),
+                cancellationToken);
+
+            return Result<LoginResult>.Failure(
+                "auth.account_locked",
+                "Account is temporarily locked due to too many failed attempts. Try again later.");
+        }
+
         var user = await userRepository.FindByEmailAsync(tenantId, normalizedEmail, cancellationToken);
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
+            await loginAttemptTracker.RecordFailedAttemptAsync(tenantId, normalizedEmail, cancellationToken);
+
             await auditService.LogAsync(
                 new AuditEntry(
                     AuditActions.LoginFailed,
@@ -60,6 +78,8 @@ public sealed class LoginCommandHandler(
                 "auth.account_inactive",
                 "Account is not active.");
         }
+
+        await loginAttemptTracker.ClearAttemptsAsync(tenantId, normalizedEmail, cancellationToken);
 
         var roles = await permissionResolver.GetRoleNamesAsync(user.Id, tenantId, cancellationToken);
         var permissions = await permissionResolver.GetPermissionsAsync(user.Id, tenantId, cancellationToken);
@@ -94,4 +114,3 @@ public sealed class LoginCommandHandler(
             user.Email));
     }
 }
-

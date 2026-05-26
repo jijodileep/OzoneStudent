@@ -13,6 +13,7 @@ using SchoolSaaS.Infrastructure.Persistence;
 using SchoolSaaS.Infrastructure.Persistence.Platform;
 using SchoolSaaS.Shared.Authorization;
 using SchoolSaaS.Shared.MultiTenancy;
+using DefaultSystemRoles = SchoolSaaS.Shared.Authorization.DefaultSystemRoles;
 
 namespace SchoolSaaS.Infrastructure.Identity;
 
@@ -21,7 +22,7 @@ public static class IdentityDataSeeder
     public const string DefaultTenantSlug = "demo";
     public const string DefaultAdminEmail = "admin@demo.school";
     public const string DefaultAdminPassword = "Admin123!ChangeMe";
-    public const string TenantAdminRoleName = "tenant_admin";
+    public const string TenantAdminRoleName = DefaultSystemRoles.TenantAdmin;
 
     public static async Task SeedAsync(IServiceProvider services, CancellationToken cancellationToken = default)
     {
@@ -44,13 +45,6 @@ public static class IdentityDataSeeder
         if (tenant is not null)
         {
             await EnsureTenantPasswordEncryptedAsync(platformDb, tenant, credentialProtector, cancellationToken);
-            await provisioner.SeedTenantPermissionsAsync(tenant.Id, cancellationToken);
-            await SyncTenantAdminRolePermissionsAsync(
-                tenantDbFactory,
-                permissionResolver,
-                tenant.Id,
-                logger,
-                cancellationToken);
         }
 
         if (tenant is null)
@@ -78,6 +72,11 @@ public static class IdentityDataSeeder
 
         await provisioner.ProvisionAsync(tenant, cancellationToken);
         await provisioner.SeedTenantPermissionsAsync(tenant.Id, cancellationToken);
+
+        await using (var tenantDb = await tenantDbFactory.CreateAsync(tenant.Id, cancellationToken))
+        {
+            await DefaultSystemRolesSeeder.SeedAsync(tenantDb, tenant.Id, cancellationToken);
+        }
         await SyncTenantAdminRolePermissionsAsync(
             tenantDbFactory,
             permissionResolver,
@@ -174,12 +173,15 @@ public static class IdentityDataSeeder
         await GrantAllPermissionsToRoleAsync(tenantDb, tenantId, role.Id, cancellationToken);
 
         var normalizedEmail = DefaultAdminEmail.ToLowerInvariant();
-        var userExists = await tenantDb.Users
+        var existingUser = await tenantDb.Users
             .IgnoreQueryFilters()
-            .AnyAsync(u => u.TenantId == tenantId && u.Email == normalizedEmail, cancellationToken);
+            .FirstOrDefaultAsync(u => u.TenantId == tenantId && u.Email == normalizedEmail, cancellationToken);
 
-        if (userExists)
+        if (existingUser is not null)
         {
+            existingUser.PasswordHash = passwordHasher.Hash(DefaultAdminPassword);
+            existingUser.Status = UserStatus.Active;
+            await tenantDb.SaveChangesAsync(cancellationToken);
             return;
         }
 

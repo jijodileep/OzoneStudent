@@ -37,6 +37,7 @@ public static class DependencyInjection
 
         services.AddScoped<TenantSaveChangesInterceptor>();
         services.AddScoped<OutboxSaveChangesInterceptor>();
+        services.AddScoped<EntityChangeCaptureInterceptor>();
 
         services.AddMultiTenancyDatabases(configuration);
         services.AddScoped<ITenantOnboardingService, TenantOnboardingService>();

@@ -16,6 +16,7 @@ public static class IdentityDependencyInjection
     public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<LoginLockoutOptions>(configuration.GetSection(LoginLockoutOptions.SectionName));
         services.Configure<AppUrlOptions>(configuration.GetSection(AppUrlOptions.SectionName));
 
         services.AddHttpContextAccessor();
@@ -31,7 +32,10 @@ public static class IdentityDependencyInjection
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IPermissionResolver, PermissionResolverService>();
+        services.AddScoped<IScopeResolver, ScopeResolverService>();
+        services.AddScoped<ILoginAttemptTracker, RedisLoginAttemptTracker>();
         services.AddScoped<IAuditService, AuditLogService>();
+        services.AddScoped<Application.Abstractions.Audit.IEntityChangeCapture, Audit.EntityChangeCapture>();
 
         return services;
     }

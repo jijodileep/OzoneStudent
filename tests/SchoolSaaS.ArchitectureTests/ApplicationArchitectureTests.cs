@@ -2,6 +2,7 @@ using System.Reflection;
 using FluentValidation;
 using NetArchTest.Rules;
 using SchoolSaaS.Application.Common;
+using SchoolSaaS.Shared.Authorization;
 
 namespace SchoolSaaS.ArchitectureTests;
 
@@ -53,6 +54,29 @@ public class ApplicationArchitectureTests
         Assert.True(
             missingValidators.Count == 0,
             "Commands missing validators: " + string.Join(", ", missingValidators));
+    }
+
+    [Fact]
+    public void Commands_ShouldHaveRequirePermissionOrAllowAnonymous()
+    {
+        var commandTypes = ApplicationAssembly
+            .GetTypes()
+            .Where(t => t is { IsAbstract: false, IsInterface: false }
+                && t.GetInterfaces().Any(i =>
+                    i.IsGenericType
+                    && i.GetGenericTypeDefinition() == typeof(ICommand<>)))
+            .ToList();
+
+        var missing = commandTypes
+            .Where(t =>
+                !typeof(IAllowAnonymousCommand).IsAssignableFrom(t)
+                && !t.GetCustomAttributes<RequirePermissionAttribute>(inherit: true).Any())
+            .Select(t => t.FullName)
+            .ToList();
+
+        Assert.True(
+            missing.Count == 0,
+            "Commands missing [RequirePermission] or IAllowAnonymousCommand: " + string.Join(", ", missing));
     }
 
     [Fact]

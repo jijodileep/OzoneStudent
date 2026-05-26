@@ -21,5 +21,6 @@ public static class EndpointRouteBuilderExtensions
         versionedApi.MapUserEndpoints();
         versionedApi.MapAuditEndpoints();
         versionedApi.MapTenantEndpoints();
+        versionedApi.MapRoleEndpoints();
     }
 }

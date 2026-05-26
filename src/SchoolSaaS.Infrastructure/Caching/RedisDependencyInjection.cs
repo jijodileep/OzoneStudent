@@ -17,14 +17,23 @@ public static class RedisDependencyInjection
         var redisOptions = configuration.GetSection(RedisOptions.SectionName).Get<RedisOptions>()
             ?? new RedisOptions();
 
+        var useMemoryCache = configuration.GetValue<bool>("Testing:UseDistributedMemoryCache");
+
+        if (useMemoryCache)
+        {
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisOptions.ConnectionString;
+                options.InstanceName = $"{redisOptions.InstancePrefix}:";
+            });
+        }
+
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(redisOptions.ConnectionString));
-
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = redisOptions.ConnectionString;
-            options.InstanceName = $"{redisOptions.InstancePrefix}:";
-        });
 
         services.AddScoped<ICacheService, RedisCacheService>();
 

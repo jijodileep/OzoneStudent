@@ -9,7 +9,8 @@ namespace SchoolSaaS.Application.Queries.Auth.GetCurrentUser;
 public sealed class GetCurrentUserQueryHandler(
     ITenantContext tenantContext,
     IUserRepository userRepository,
-    IPermissionResolver permissionResolver) : IRequestHandler<GetCurrentUserQuery, Result<CurrentUserDto>>
+    IPermissionResolver permissionResolver,
+    IScopeResolver scopeResolver) : IRequestHandler<GetCurrentUserQuery, Result<CurrentUserDto>>
 {
     public async Task<Result<CurrentUserDto>> Handle(
         GetCurrentUserQuery request,
@@ -39,6 +40,7 @@ public sealed class GetCurrentUserQueryHandler(
 
         var roles = await permissionResolver.GetRoleNamesAsync(user.Id, user.TenantId, cancellationToken);
         var permissions = await permissionResolver.GetPermissionsAsync(user.Id, user.TenantId, cancellationToken);
+        var scope = await scopeResolver.ResolveAsync(user.Id, user.TenantId, cancellationToken);
 
         return Result<CurrentUserDto>.Success(new CurrentUserDto(
             user.Id,
@@ -47,7 +49,9 @@ public sealed class GetCurrentUserQueryHandler(
             profile?.FirstName ?? string.Empty,
             profile?.LastName ?? string.Empty,
             roles,
-            permissions));
+            permissions,
+            scope.ScopeType.ToString(),
+            scope.ScopeIds));
     }
 }
 

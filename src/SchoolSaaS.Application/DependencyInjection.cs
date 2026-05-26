@@ -19,6 +19,7 @@ public static class DependencyInjection
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(TenantBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditReadBehavior<,>));
         });
 
         foreach (var assembly in ValidatorAssemblyDiscovery.Discover())

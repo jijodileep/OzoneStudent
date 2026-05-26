@@ -8,8 +8,9 @@ namespace SchoolSaaS.Application.Behaviors;
 /// <summary>
 /// Audits successful write commands (<see cref="ICommand{T}"/>).
 /// </summary>
-public sealed class AuditBehavior<TRequest, TResponse>(IAuditService auditService)
-    : IPipelineBehavior<TRequest, TResponse>
+public sealed class AuditBehavior<TRequest, TResponse>(
+    IAuditService auditService,
+    IEntityChangeCapture entityChangeCapture) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
     where TResponse : Result
 {
@@ -26,6 +27,27 @@ public sealed class AuditBehavior<TRequest, TResponse>(IAuditService auditServic
 
         if (!isCommand || response.IsFailure)
         {
+            return response;
+        }
+
+        var changes = entityChangeCapture.GetChanges();
+        if (changes.Count > 0)
+        {
+            foreach (var change in changes)
+            {
+                await auditService.LogAsync(
+                    new AuditEntry(
+                        change.Action,
+                        change.Category,
+                        change.EntityType,
+                        change.EntityId,
+                        Description: $"{change.EntityType} {change.Action}",
+                        BeforeJson: change.BeforeJson,
+                        AfterJson: change.AfterJson),
+                    cancellationToken);
+            }
+
+            entityChangeCapture.Clear();
             return response;
         }
 

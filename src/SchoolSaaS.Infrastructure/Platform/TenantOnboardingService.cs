@@ -7,9 +7,11 @@ using SchoolSaaS.Application.Commands.Tenants.CreateTenant;
 using SchoolSaaS.Domain.Identity;
 using SchoolSaaS.Domain.Platform;
 using SchoolSaaS.Domain.Rbac;
+using SchoolSaaS.Infrastructure.Identity;
 using SchoolSaaS.Infrastructure.MultiTenancy;
 using SchoolSaaS.Infrastructure.Persistence;
 using SchoolSaaS.Infrastructure.Persistence.Platform;
+using SchoolSaaS.Shared.Authorization;
 using SchoolSaaS.Shared.Results;
 
 namespace SchoolSaaS.Infrastructure.Platform;
@@ -22,7 +24,6 @@ public sealed class TenantOnboardingService(
     IPasswordHasher passwordHasher,
     IOptions<TenancyOptions> tenancyOptions) : ITenantOnboardingService
 {
-    private const string TenantAdminRoleName = "tenant_admin";
 
     public async Task<Result<CreateTenantResult>> CreateTenantAsync(
         CreateTenantCommand request,
@@ -67,6 +68,11 @@ public sealed class TenantOnboardingService(
         await provisioner.ProvisionAsync(tenant, cancellationToken);
         await provisioner.SeedTenantPermissionsAsync(tenant.Id, cancellationToken);
 
+        await using (var tenantDb = await tenantDbFactory.CreateAsync(tenant.Id, cancellationToken))
+        {
+            await DefaultSystemRolesSeeder.SeedAsync(tenantDb, tenant.Id, cancellationToken);
+        }
+
         Guid? adminUserId = null;
         if (!string.IsNullOrWhiteSpace(request.AdminEmail) && !string.IsNullOrWhiteSpace(request.AdminPassword))
         {
@@ -99,37 +105,44 @@ public sealed class TenantOnboardingService(
 
         var role = await tenantDb.Roles
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(r => r.TenantId == tenantId && r.Name == TenantAdminRoleName, cancellationToken);
+            .FirstOrDefaultAsync(
+                r => r.TenantId == tenantId && r.Name == DefaultSystemRoles.TenantAdmin,
+                cancellationToken);
 
         if (role is null)
         {
-            role = new Role
-            {
-                TenantId = tenantId,
-                Name = TenantAdminRoleName,
-                Description = "Full tenant administrator",
-                IsSystem = true
-            };
-            tenantDb.Roles.Add(role);
-            await tenantDb.SaveChangesAsync(cancellationToken);
+            throw new InvalidOperationException(
+                $"System role '{DefaultSystemRoles.TenantAdmin}' was not seeded for tenant {tenantId}.");
+        }
 
-            var permissionIds = await tenantDb.Permissions
-                .IgnoreQueryFilters()
-                .Select(p => p.Id)
-                .ToListAsync(cancellationToken);
+        var assignedIds = await tenantDb.RolePermissions
+            .IgnoreQueryFilters()
+            .Where(rp => rp.TenantId == tenantId && rp.RoleId == role.Id)
+            .Select(rp => rp.PermissionId)
+            .ToListAsync(cancellationToken);
 
-            foreach (var permissionId in permissionIds)
+        var allPermissionIds = await tenantDb.Permissions
+            .IgnoreQueryFilters()
+            .Select(p => p.Id)
+            .ToListAsync(cancellationToken);
+
+        var assignedSet = assignedIds.ToHashSet();
+        foreach (var permissionId in allPermissionIds)
+        {
+            if (assignedSet.Contains(permissionId))
             {
-                tenantDb.RolePermissions.Add(new RolePermission
-                {
-                    TenantId = tenantId,
-                    RoleId = role.Id,
-                    PermissionId = permissionId
-                });
+                continue;
             }
 
-            await tenantDb.SaveChangesAsync(cancellationToken);
+            tenantDb.RolePermissions.Add(new RolePermission
+            {
+                TenantId = tenantId,
+                RoleId = role.Id,
+                PermissionId = permissionId
+            });
         }
+
+        await tenantDb.SaveChangesAsync(cancellationToken);
 
         var normalizedEmail = adminEmail.Trim().ToLowerInvariant();
         var user = new User

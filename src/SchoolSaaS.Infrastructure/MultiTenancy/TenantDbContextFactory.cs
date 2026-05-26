@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SchoolSaaS.Infrastructure.Persistence;
 using SchoolSaaS.Infrastructure.Persistence.Interceptors;
+using EntityChangeCaptureInterceptor = SchoolSaaS.Infrastructure.Persistence.Interceptors.EntityChangeCaptureInterceptor;
 using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.Infrastructure.MultiTenancy;
@@ -33,7 +34,8 @@ public sealed class TenantDbContextFactory(
             .UseSnakeCaseNamingConvention()
             .AddInterceptors(
                 new TenantSaveChangesInterceptor(accessor),
-                serviceProvider.GetRequiredService<OutboxSaveChangesInterceptor>());
+                serviceProvider.GetRequiredService<OutboxSaveChangesInterceptor>(),
+                serviceProvider.GetRequiredService<EntityChangeCaptureInterceptor>());
 
         return new ApplicationDbContext(optionsBuilder.Options, accessor);
     }

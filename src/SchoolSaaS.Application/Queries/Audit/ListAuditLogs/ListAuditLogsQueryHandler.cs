@@ -7,8 +7,7 @@ namespace SchoolSaaS.Application.Queries.Audit.ListAuditLogs;
 
 public sealed class ListAuditLogsQueryHandler(
     ITenantContext tenantContext,
-    IAuditLogRepository auditLogRepository,
-    IAuditService auditService) : IRequestHandler<ListAuditLogsQuery, Result<ListAuditLogsResult>>
+    IAuditLogRepository auditLogRepository) : IRequestHandler<ListAuditLogsQuery, Result<ListAuditLogsResult>>
 {
     public async Task<Result<ListAuditLogsResult>> Handle(
         ListAuditLogsQuery request,
@@ -31,13 +30,6 @@ public sealed class ListAuditLogsQueryHandler(
             request.ToUtc);
 
         var (items, total) = await auditLogRepository.ListAsync(tenantId, filter, cancellationToken);
-
-        await auditService.LogAsync(
-            new AuditEntry(
-                AuditActions.Read,
-                AuditCategories.Audit,
-                Description: $"Listed audit logs page {request.Page}"),
-            cancellationToken);
 
         var dtos = items.Select(a => new AuditLogDto(
             a.Id,
