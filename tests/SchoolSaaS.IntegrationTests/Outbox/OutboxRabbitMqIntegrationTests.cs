@@ -3,10 +3,16 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
 using RabbitMQ.Client;
+using SchoolSaaS.Domain.Platform;
 using SchoolSaaS.Domain.Platform.Outbox;
+using SchoolSaaS.Application.Abstractions.MultiTenancy;
+using SchoolSaaS.Infrastructure.MultiTenancy;
 using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.Persistence.Platform;
 using SchoolSaaS.Shared.Events;
+using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.IntegrationTests.Outbox;
 
@@ -22,6 +28,32 @@ public sealed class OutboxRabbitMqIntegrationTests(OutboxRabbitMqFixture fixture
         var tenantId = Guid.NewGuid();
         var eventId = Guid.NewGuid();
         var occurredAt = DateTime.UtcNow;
+        var mysql = new MySqlConnectionStringBuilder(fixture.BaseConnectionString);
+
+        using (var setupScope = fixture.Factory.Services.CreateScope())
+        {
+            var platformDb = setupScope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+            var provisioner = setupScope.ServiceProvider.GetRequiredService<ITenantDatabaseProvisioner>();
+            var credentialProtector = setupScope.ServiceProvider.GetRequiredService<ITenantDbCredentialProtector>();
+
+            var tenant = new Tenant
+            {
+                Id = tenantId,
+                Name = "Outbox Test Tenant",
+                Slug = $"outbox-{tenantId:N}",
+                DbServer = mysql.Server ?? "localhost",
+                DbPort = (int)mysql.Port,
+                DbName = $"ss_t_{tenantId:N}",
+                DbUser = mysql.UserID,
+                DbPassword = credentialProtector.Protect(mysql.Password),
+                Plan = "free",
+                Status = TenantStatus.Active
+            };
+
+            platformDb.Tenants.Add(tenant);
+            await platformDb.SaveChangesAsync();
+            await provisioner.ProvisionAsync(tenant);
+        }
 
         var integrationEvent = new TestIntegrationEvent(tenantId, marker);
         var payloadJson = JsonSerializer.Serialize(
@@ -33,6 +65,7 @@ public sealed class OutboxRabbitMqIntegrationTests(OutboxRabbitMqFixture fixture
 
         using (var scope = fixture.Factory.Services.CreateScope())
         {
+            scope.ServiceProvider.GetRequiredService<TenantContext>().TenantId = tenantId;
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             db.OutboxMessages.Add(new OutboxMessage
             {
@@ -67,6 +100,7 @@ public sealed class OutboxRabbitMqIntegrationTests(OutboxRabbitMqFixture fixture
 
         using (var scope = fixture.Factory.Services.CreateScope())
         {
+            scope.ServiceProvider.GetRequiredService<TenantContext>().TenantId = tenantId;
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var row = await db.OutboxMessages
                 .AsNoTracking()

@@ -1,5 +1,23 @@
 # MVP Phase 1 — Sprint-Ready Backlog Guide
 
+## Implementation alignment (May 2026)
+
+Backlog tasks describe **target** scope. The repo today:
+
+| Area | Status |
+|------|--------|
+| Stack | ASP.NET Core 9, EF Core, **MySQL**, Redis, RabbitMQ, Serilog |
+| Tenancy | `PlatformDbContext` + per-tenant `ApplicationDbContext` (`ss_t_{slug}`) |
+| Sprint 1 core | MediatR pipeline, tenant filter/interceptor, outbox, Docker, CI — largely done |
+| Sprint 2 auth | login, refresh, logout, register, me, forgot/reset/change password, invite, accept-invitation, audit list — done |
+| Application layout | `Commands/{Area}/{Endpoint}/`, `Queries/{Area}/{Endpoint}/` (see `AGENTS.md`) |
+| Sprint 3 tenant | `POST /api/v1/tenants`, `CreateTenantCommand`, `ITenantOnboardingService` — done; academic structure — not done |
+| Super admin | Not seeded; use demo `tenant_admin` + `institution.tenant.create` for tenant creation |
+
+Paths in [`sprint-1-l5-subtasks.md`](sprint-1-l5-subtasks.md) that reference `src/Modules/` or PostgreSQL are **planning targets** — implement under `src/SchoolSaaS.*`, MySQL, and **`Application/Commands|Queries/{Area}/{Endpoint}/`** unless a task explicitly migrates layout.
+
+---
+
 ## Files Included
 
 | File | Use For |
@@ -87,7 +105,7 @@ These tasks **must** complete before Sprint 2 starts:
 ```
 CreateSolutionStructure
 DefineBaseEntity
-ConfigureEfCorePostgreSql
+ConfigureEfCoreMySql
 DefineITenantContext
 ImplementTenantContextMiddleware
 CreateTenantQueryFilter
@@ -157,7 +175,7 @@ Every task is **done** when:
 
 ### Context
 - Project: Multi-tenant Student Management SaaS
-- Stack: ASP.NET Core 9, Clean Architecture, CQRS/MediatR, EF Core, PostgreSQL
+- Stack: ASP.NET Core 9, Clean Architecture, CQRS/MediatR, EF Core, MySQL (platform + per-tenant DBs)
 - Module: {ModuleName}
 
 ### Dependencies (already implemented)

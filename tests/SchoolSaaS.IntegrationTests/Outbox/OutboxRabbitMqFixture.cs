@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.Persistence.Platform;
 using Testcontainers.MySql;
 using Testcontainers.RabbitMq;
 
@@ -12,7 +12,11 @@ namespace SchoolSaaS.IntegrationTests.Outbox;
 /// </summary>
 public sealed class OutboxRabbitMqFixture : IAsyncLifetime
 {
-    private readonly MySqlContainer _mysql = new MySqlBuilder("mysql:8.0").Build();
+    private readonly MySqlContainer _mysql = new MySqlBuilder("mysql:8.0")
+        .WithDatabase("schoolsaas_platform")
+        .WithUsername("root")
+        .WithPassword("password")
+        .Build();
 
     private readonly RabbitMqContainer _rabbit = new RabbitMqBuilder("rabbitmq:3-alpine")
         .WithUsername("guest")
@@ -25,16 +29,26 @@ public sealed class OutboxRabbitMqFixture : IAsyncLifetime
 
     public int RabbitMqAmqpPort => _rabbit.GetMappedPublicPort(5672);
 
+    public string BaseConnectionString => _mysql.GetConnectionString();
+
     public async Task InitializeAsync()
     {
         await Task.WhenAll(_mysql.StartAsync(), _rabbit.StartAsync());
 
+        var platformConnection = TestMysqlConnection.Platform(BaseConnectionString);
+        var provisioningConnection = TestMysqlConnection.Provisioning(BaseConnectionString);
+        var mysql = TestMysqlConnection.Parse(BaseConnectionString);
+
         Factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
-                builder.UseSetting(
-                    "ConnectionStrings:DefaultConnection",
-                    _mysql.GetConnectionString());
+                builder.UseSetting("Testing:SkipDataSeed", "true");
+                builder.UseSetting("Tenancy:DefaultDbServer", mysql.Server ?? "localhost");
+                builder.UseSetting("Tenancy:DefaultDbPort", ((int)mysql.Port).ToString());
+                builder.UseSetting("Tenancy:DefaultDbUser", mysql.UserID);
+                builder.UseSetting("Tenancy:DefaultDbPassword", mysql.Password);
+                builder.UseSetting("ConnectionStrings:Platform", platformConnection);
+                builder.UseSetting("ConnectionStrings:Provisioning", provisioningConnection);
                 builder.UseSetting(
                     "ConnectionStrings:Redis",
                     "127.0.0.1:6379,abortConnect=false");
@@ -53,8 +67,8 @@ public sealed class OutboxRabbitMqFixture : IAsyncLifetime
             });
 
         using var scope = Factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await db.Database.MigrateAsync();
+        var platformDb = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+        await platformDb.Database.MigrateAsync();
     }
 
     public async Task DisposeAsync()

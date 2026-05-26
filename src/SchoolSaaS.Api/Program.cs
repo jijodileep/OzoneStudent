@@ -5,6 +5,7 @@ using SchoolSaaS.Api.Infrastructure;
 using SchoolSaaS.Api.Middleware;
 using SchoolSaaS.Application;
 using SchoolSaaS.Infrastructure;
+using SchoolSaaS.Infrastructure.Identity;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,14 +26,19 @@ builder.Services.AddProblemDetails();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddApiVersioningServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment()
+    && !app.Configuration.GetValue<bool>("Testing:SkipDataSeed"))
+{
+    await IdentityDataSeeder.SeedAsync(app.Services);
+}
 
 app.UseExceptionHandler();
 app.UseSerilogRequestLogging();

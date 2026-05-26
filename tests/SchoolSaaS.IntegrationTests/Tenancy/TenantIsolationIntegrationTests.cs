@@ -1,9 +1,13 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
 using SchoolSaaS.Domain.Exceptions;
 using SchoolSaaS.Domain.Platform;
+using SchoolSaaS.Application.Abstractions.MultiTenancy;
+using SchoolSaaS.Infrastructure.MultiTenancy;
 using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.Persistence.Platform;
 using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.IntegrationTests.Tenancy;
@@ -82,15 +86,32 @@ public sealed class TenantIsolationIntegrationTests : IntegrationTestBase, IAsyn
         _tenantAId = Guid.NewGuid();
         _tenantBId = Guid.NewGuid();
 
+        var mysql = new MySqlConnectionStringBuilder(Fixture.BaseConnectionString);
+
         using (var scope = Factory.Services.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var platformDb = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+            var provisioner = scope.ServiceProvider.GetRequiredService<ITenantDatabaseProvisioner>();
+            var credentialProtector = scope.ServiceProvider.GetRequiredService<ITenantDbCredentialProtector>();
 
-            db.Tenants.AddRange(
-                CreateTenant(_tenantAId, "Tenant A", $"tenant-a-{_tenantAId:N}"),
-                CreateTenant(_tenantBId, "Tenant B", $"tenant-b-{_tenantBId:N}"));
+            var tenantA = CreateTenant(
+                _tenantAId,
+                "Tenant A",
+                $"tenant-a-{_tenantAId:N}",
+                mysql,
+                credentialProtector);
+            var tenantB = CreateTenant(
+                _tenantBId,
+                "Tenant B",
+                $"tenant-b-{_tenantBId:N}",
+                mysql,
+                credentialProtector);
 
-            await db.SaveChangesAsync();
+            platformDb.Tenants.AddRange(tenantA, tenantB);
+            await platformDb.SaveChangesAsync();
+
+            await provisioner.ProvisionAsync(tenantA);
+            await provisioner.ProvisionAsync(tenantB);
         }
 
         await RunAsTenantAsync(_tenantAId, async db =>
@@ -108,16 +129,21 @@ public sealed class TenantIsolationIntegrationTests : IntegrationTestBase, IAsyn
         });
     }
 
-    private static Tenant CreateTenant(Guid id, string name, string slug) => new()
+    private static Tenant CreateTenant(
+        Guid id,
+        string name,
+        string slug,
+        MySqlConnectionStringBuilder mysql,
+        ITenantDbCredentialProtector credentialProtector) => new()
     {
         Id = id,
         Name = name,
         Slug = slug,
-        DbServer = "localhost",
-        DbPort = 3306,
-        DbName = slug,
-        DbUser = "root",
-        DbPassword = "password",
+        DbServer = mysql.Server ?? "localhost",
+        DbPort = (int)mysql.Port,
+        DbName = $"ss_t_{id:N}",
+        DbUser = mysql.UserID,
+        DbPassword = credentialProtector.Protect(mysql.Password),
         Plan = "free",
         Status = TenantStatus.Active
     };

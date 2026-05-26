@@ -3,9 +3,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SchoolSaaS.Domain.Common;
 using SchoolSaaS.Infrastructure.Caching;
+using SchoolSaaS.Infrastructure.Identity;
 using SchoolSaaS.Infrastructure.Events;
 using SchoolSaaS.Infrastructure.Messaging;
+using SchoolSaaS.Application.Abstractions.Platform;
+using SchoolSaaS.Infrastructure.MultiTenancy;
 using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.Platform;
 using SchoolSaaS.Infrastructure.Persistence.Interceptors;
 using SchoolSaaS.Shared.Events;
 using SchoolSaaS.Shared.MultiTenancy;
@@ -18,14 +22,11 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' is not configured.");
-
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
         services.Configure<OutboxPublisherOptions>(configuration.GetSection(OutboxPublisherOptions.SectionName));
 
         services.AddRedisCaching(configuration);
+        services.AddIdentityInfrastructure(configuration);
 
         services.AddScoped<TenantContext>();
         services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());
@@ -37,14 +38,8 @@ public static class DependencyInjection
         services.AddScoped<TenantSaveChangesInterceptor>();
         services.AddScoped<OutboxSaveChangesInterceptor>();
 
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
-        {
-            options.UseMySql(connectionString, MySqlServerVersionProvider.Version)
-                .UseSnakeCaseNamingConvention()
-                .AddInterceptors(
-                    sp.GetRequiredService<TenantSaveChangesInterceptor>(),
-                    sp.GetRequiredService<OutboxSaveChangesInterceptor>());
-        });
+        services.AddMultiTenancyDatabases(configuration);
+        services.AddScoped<ITenantOnboardingService, TenantOnboardingService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

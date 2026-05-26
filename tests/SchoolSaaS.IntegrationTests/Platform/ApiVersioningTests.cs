@@ -9,7 +9,11 @@ public class ApiVersioningTests : IClassFixture<WebApplicationFactory<Program>>
     private readonly HttpClient _client;
 
     public ApiVersioningTests(WebApplicationFactory<Program> factory) =>
-        _client = factory.WithWebHostBuilder(b => b.UseSetting("Outbox:Enabled", "false")).CreateClient();
+        _client = factory.WithWebHostBuilder(b =>
+        {
+            b.UseSetting("Outbox:Enabled", "false");
+            b.UseSetting("Testing:SkipDataSeed", "true");
+        }).CreateClient();
 
     [Fact]
     public async Task Health_V1_ReturnsOk()

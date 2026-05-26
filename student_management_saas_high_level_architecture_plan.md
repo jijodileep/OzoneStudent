@@ -3,6 +3,8 @@
 
 > **Superseded by:** [`student_management_saas_complete_module_plan.md`](student_management_saas_complete_module_plan.md) — the master plan with all 16 modules, phases, APIs, permissions, and dependencies. This file is kept for historical reference.
 
+> **Implementation note (May 2026):** The live API uses **MySQL 8**, **database-per-tenant** (`ss_t_{slug}`), and a **layered** layout under `src/SchoolSaaS.*` — not PostgreSQL shared-schema or `src/Modules/*` as described in older sections below. CQRS code lives in `SchoolSaaS.Application/Commands/{Area}/{Endpoint}/` and `Queries/{Area}/{Endpoint}/`. See [`README.md`](README.md), [`AGENTS.md`](AGENTS.md), and the “As implemented” section in the master plan.
+
 ---
 
 # Vision
@@ -263,7 +265,7 @@ Abstract provider model supporting:
 
 # Database
 
-- PostgreSQL
+- MySQL 8 *(implemented; was planned as PostgreSQL)*
 - Redis
 - RabbitMQ
 
@@ -382,7 +384,7 @@ Single VPS Deployment:
 - Docker
 - Docker Compose
 - Nginx
-- PostgreSQL
+- MySQL 8 *(implemented; was planned as PostgreSQL)*
 - Redis
 - RabbitMQ
 

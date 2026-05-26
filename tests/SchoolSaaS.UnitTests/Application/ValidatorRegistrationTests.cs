@@ -2,8 +2,7 @@ using FluentAssertions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SchoolSaaS.Application;
-using SchoolSaaS.Application.Platform.Queries;
-using SchoolSaaS.Application.Platform.Validators;
+using SchoolSaaS.Application.Queries.Platform.Ping;
 
 namespace SchoolSaaS.UnitTests.Application;
 

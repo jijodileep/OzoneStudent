@@ -17,5 +17,9 @@ public static class EndpointRouteBuilderExtensions
             .WithApiVersionSet(versionSet);
 
         versionedApi.MapPlatformEndpoints();
+        versionedApi.MapAuthEndpoints();
+        versionedApi.MapUserEndpoints();
+        versionedApi.MapAuditEndpoints();
+        versionedApi.MapTenantEndpoints();
     }
 }

@@ -45,6 +45,17 @@ public static class StudentEndpoints
 
 - Bind request → command/query → `IMediator.Send()` → map `Result` to HTTP
 - **No business logic in endpoints**
+- Import types from `SchoolSaaS.Application.Commands.{Area}.{Endpoint}` or `Queries.{Area}.{Endpoint}` (see `backend-cqrs-patterns.mdc`)
+
+## Endpoint → Application folder map
+
+| API file | Application folders |
+|----------|---------------------|
+| `Endpoints/AuthEndpoints.cs` | `Commands/Auth/*`, `Queries/Auth/GetCurrentUser` |
+| `Endpoints/UserEndpoints.cs` | `Commands/Users/InviteUser` |
+| `Endpoints/TenantEndpoints.cs` | `Commands/Tenants/CreateTenant` |
+| `Endpoints/AuditEndpoints.cs` | `Queries/Audit/ListAuditLogs` |
+| `Endpoints/PlatformEndpoints.cs` | `Queries/Platform/Ping` |
 
 ## Pagination
 

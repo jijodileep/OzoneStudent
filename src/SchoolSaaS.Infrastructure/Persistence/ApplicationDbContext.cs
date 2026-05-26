@@ -1,12 +1,18 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SchoolSaaS.Domain.Common;
+using SchoolSaaS.Domain.Audit;
+using SchoolSaaS.Domain.Identity;
 using SchoolSaaS.Domain.Platform;
 using SchoolSaaS.Domain.Platform.Outbox;
+using SchoolSaaS.Domain.Rbac;
 using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.Infrastructure.Persistence;
 
+/// <summary>
+/// Per-tenant database context. Platform catalog (tenants, settings) uses <see cref="Platform.PlatformDbContext"/>.
+/// </summary>
 public class ApplicationDbContext : DbContext
 {
     private readonly ITenantContextAccessor _tenantContextAccessor;
@@ -19,19 +25,39 @@ public class ApplicationDbContext : DbContext
         _tenantContextAccessor = tenantContextAccessor;
     }
 
-    public DbSet<Tenant> Tenants => Set<Tenant>();
-
-    public DbSet<TenantSetting> TenantSettings => Set<TenantSetting>();
-
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public DbSet<ProcessedEvent> ProcessedEvents => Set<ProcessedEvent>();
 
     public DbSet<TenantIsolationProbe> TenantIsolationProbes => Set<TenantIsolationProbe>();
 
+    public DbSet<User> Users => Set<User>();
+
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+
+    public DbSet<UserInvitation> UserInvitations => Set<UserInvitation>();
+
+    public DbSet<Permission> Permissions => Set<Permission>();
+
+    public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly,
+            type => type.Namespace is null
+                || !type.Namespace.EndsWith(".Configurations.Platform", StringComparison.Ordinal));
+
         ApplyTenantQueryFilters(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }

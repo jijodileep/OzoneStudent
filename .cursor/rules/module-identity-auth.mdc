@@ -1,6 +1,6 @@
 ---
 description: Identity & Authentication module — users, JWT, login, invitations
-globs: src/**/Modules/Identity/**/*
+globs: src/SchoolSaaS.Application/Commands/Auth/**,src/SchoolSaaS.Application/Commands/Users/**,src/SchoolSaaS.Application/Queries/Auth/**,src/SchoolSaaS.Domain/Identity/**,src/SchoolSaaS.Api/Endpoints/AuthEndpoints.cs,src/SchoolSaaS.Api/Endpoints/UserEndpoints.cs
 alwaysApply: false
 ---
 
@@ -24,11 +24,20 @@ users.invite
 users.manage
 ```
 
-## Commands (MVP)
+## Commands & queries (MVP) — folder paths
 
-- `RegisterUserCommand`, `InviteUserCommand`, `AcceptInvitationCommand`
-- `LoginCommand`, `RefreshTokenCommand`, `RevokeRefreshTokenCommand`
-- `ForgotPasswordCommand`, `ResetPasswordCommand`, `ChangePasswordCommand`
+| Type | Path under `SchoolSaaS.Application` |
+|------|-------------------------------------|
+| Login | `Commands/Auth/Login/` |
+| Logout | `Commands/Auth/Logout/` |
+| RefreshToken | `Commands/Auth/RefreshToken/` |
+| Register | `Commands/Auth/Register/` |
+| ForgotPassword | `Commands/Auth/ForgotPassword/` |
+| ResetPassword | `Commands/Auth/ResetPassword/` |
+| ChangePassword | `Commands/Auth/ChangePassword/` |
+| AcceptInvitation | `Commands/Auth/AcceptInvitation/` |
+| InviteUser | `Commands/Users/InviteUser/` |
+| GetCurrentUser | `Queries/Auth/GetCurrentUser/` |
 
 ## Security Rules
 

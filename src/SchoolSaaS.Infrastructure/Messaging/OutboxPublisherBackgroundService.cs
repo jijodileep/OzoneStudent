@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using SchoolSaaS.Domain.Platform;
 using SchoolSaaS.Domain.Platform.Outbox;
-using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.MultiTenancy;
+using SchoolSaaS.Infrastructure.Persistence.Platform;
 
 namespace SchoolSaaS.Infrastructure.Messaging;
 
@@ -45,7 +47,49 @@ public sealed class OutboxPublisherBackgroundService(
     private async Task PublishPendingMessagesAsync(CancellationToken cancellationToken)
     {
         using var scope = scopeFactory.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var platformDb = scope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+        var tenantDbFactory = scope.ServiceProvider.GetRequiredService<ITenantDbContextFactory>();
+
+        var tenantIds = await platformDb.Tenants
+            .AsNoTracking()
+            .Where(t => t.Status == TenantStatus.Active && !t.IsDeleted)
+            .Select(t => t.Id)
+            .ToListAsync(cancellationToken);
+
+        if (tenantIds.Count == 0)
+        {
+            return;
+        }
+
+        await using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+
+        var exchange = rabbitMqOptions.Value.Exchange;
+        await channel.ExchangeDeclareAsync(
+            exchange: exchange,
+            type: ExchangeType.Topic,
+            durable: true,
+            cancellationToken: cancellationToken);
+
+        foreach (var tenantId in tenantIds)
+        {
+            await PublishTenantBatchAsync(
+                tenantDbFactory,
+                channel,
+                exchange,
+                tenantId,
+                cancellationToken);
+        }
+    }
+
+    private async Task PublishTenantBatchAsync(
+        ITenantDbContextFactory tenantDbFactory,
+        IChannel channel,
+        string exchange,
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        await using var db = await tenantDbFactory.CreateAsync(tenantId, cancellationToken);
 
         var batchSize = outboxOptions.Value.BatchSize;
         var maxRetries = outboxOptions.Value.MaxRetries;
@@ -60,16 +104,6 @@ public sealed class OutboxPublisherBackgroundService(
         {
             return;
         }
-
-        await using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken);
-        await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-
-        var exchange = rabbitMqOptions.Value.Exchange;
-        await channel.ExchangeDeclareAsync(
-            exchange: exchange,
-            type: ExchangeType.Topic,
-            durable: true,
-            cancellationToken: cancellationToken);
 
         foreach (var message in pending)
         {
@@ -107,16 +141,18 @@ public sealed class OutboxPublisherBackgroundService(
                     message.Error = $"DEAD_LETTER: {ex.Message}";
                     logger.LogError(
                         ex,
-                        "Outbox message {EventId} moved to dead-letter after {RetryCount} attempts",
+                        "Outbox message {EventId} for tenant {TenantId} moved to dead-letter after {RetryCount} attempts",
                         message.EventId,
+                        tenantId,
                         message.RetryCount);
                 }
                 else
                 {
                     logger.LogWarning(
                         ex,
-                        "Failed to publish outbox message {EventId} (attempt {RetryCount})",
+                        "Failed to publish outbox message {EventId} for tenant {TenantId} (attempt {RetryCount})",
                         message.EventId,
+                        tenantId,
                         message.RetryCount);
                 }
             }

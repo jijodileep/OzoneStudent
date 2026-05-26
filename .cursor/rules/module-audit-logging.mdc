@@ -1,6 +1,6 @@
 ---
 description: Audit Logging module — universal append-only audit trail
-globs: src/**/Modules/Audit/**/*
+globs: src/SchoolSaaS.Application/Queries/Audit/**,src/SchoolSaaS.Domain/Audit/**,src/SchoolSaaS.Api/Endpoints/AuditEndpoints.cs,src/SchoolSaaS.Application/Behaviors/**
 alwaysApply: false
 ---
 
@@ -54,12 +54,12 @@ audit.logs.read-platform      # super admin — cross-tenant
 
 ## APIs
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/api/v1/audit-logs` | List with filters |
-| GET | `/api/v1/audit-logs/{id}` | Detail |
-| GET | `/api/v1/audit-logs/export` | CSV export (itself audited) |
-| GET | `/api/v1/audit-logs/entity/{type}/{id}` | History for one entity |
+| Method | Endpoint | Application path | Status |
+|---|---|---|---|
+| GET | `/api/v1/audit-logs` | `Queries/Audit/ListAuditLogs/` | ✅ paged list |
+| GET | `/api/v1/audit-logs/{id}` | — | ❌ |
+| GET | `/api/v1/audit-logs/export` | — | ❌ |
+| GET | `/api/v1/audit-logs/entity/{type}/{id}` | — | ❌ |
 
 ## Storage & Retention
 

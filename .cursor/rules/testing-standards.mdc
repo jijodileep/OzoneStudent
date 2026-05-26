@@ -32,9 +32,15 @@ public async Task Handle_ValidCommand_ReturnsSuccessWithId()
 
 ## Integration Tests (Testcontainers)
 
-- PostgreSQL container per test collection
-- Seed tenant + admin user in fixture
-- Required per module: `TenantIsolationIntegrationTest`
+- **MySQL 8** container per test collection (`DatabaseFixture`)
+- Seed tenant + admin via `IdentityDataSeeder` in tests
+- Auth flows: `tests/.../Identity/` (login, password reset, invite)
+- Tenant provisioning: `tests/.../Institution/TenantProvisioningIntegrationTests.cs`
+- Required: `TenantIsolationIntegrationTest`
+
+## Validator unit tests
+
+Place beside feature area, e.g. `UnitTests/Identity/ForgotPasswordCommandValidatorTests.cs`, importing from `Application.Commands.Auth.ForgotPassword`.
 
 ## Architecture Tests (NetArchTest)
 

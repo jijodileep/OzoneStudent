@@ -1,10 +1,32 @@
 # Student Management SaaS Platform
 ## Complete Module Plan (Master Reference)
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Last Updated:** May 2026  
-**Status:** Planning — AI-assisted development ready  
-**Architecture:** Modular Monolith → Microservices (future)
+**Status:** MVP Phase 1 in progress — API foundation implemented  
+**Architecture:** Layered monolith (`src/SchoolSaaS.*`) → modular folders / microservices (future)
+
+---
+
+## As implemented (May 2026)
+
+Use this section when docs disagree with older planning text.
+
+| Topic | Current state |
+|-------|----------------|
+| Database | **MySQL 8** (Docker compose + local); not PostgreSQL |
+| Tenancy | **Database per tenant** (`ss_t_{slug}`); platform catalog in `schoolsaas_platform` |
+| Code layout | `src/SchoolSaaS.{Api,Application,Domain,Infrastructure,Shared}/` |
+| Application CQRS | `Commands/{Area}/{Endpoint}/` and `Queries/{Area}/{Endpoint}/` (see §9) |
+| Auth API | login, refresh, logout, register, me, forgot/reset password, change password, accept-invitation — **live** |
+| Users API | `POST /api/v1/users/invite` — **live** |
+| Audit API | `GET /api/v1/audit-logs` (paged) — **live** |
+| Tenant API | `POST /api/v1/tenants` + `ITenantOnboardingService` — **live** |
+| Super admin | JWT role `super_admin` only — **no seeded user** |
+| Create tenant permission | `institution.tenant.create` on demo `tenant_admin` |
+| Not built yet | real email (SMTP), academic structure, students, fees, Angular/mobile integration |
+
+See [`README.md`](README.md) for login credentials and curl examples.
 
 ---
 
@@ -70,7 +92,7 @@ Build a **production-grade, multi-tenant Student Management SaaS** for instituti
 | Runtime | ASP.NET Core 9 |
 | Architecture | Clean Architecture, CQRS + MediatR |
 | ORM | Entity Framework Core |
-| Database | PostgreSQL |
+| Database | MySQL 8 (platform DB + per-tenant DBs) |
 | Cache | Redis |
 | Message Bus | RabbitMQ |
 | Logging | Serilog |
@@ -116,10 +138,12 @@ Modular Monolith (Phase 1–3)
 
 ## Multi-Tenancy
 
-- **Strategy:** Shared database, shared schema
-- **Isolation:** `TenantId` column on all tenant-scoped entities
-- **Enforcement:** Global EF query filter + middleware + integration tests
-- **Resolution:** JWT `tenant_id` claim (server-side only)
+- **Strategy:** **Database per tenant** on configurable MySQL host (`tenants.db_server`, `db_name`, encrypted `db_password`)
+- **Platform catalog:** `PlatformDbContext` → `schoolsaas_platform` (`tenants`, `tenant_settings`, permission catalog)
+- **Tenant data:** `ApplicationDbContext` → `ss_t_{slug}` (users, RBAC, audit, outbox, domain tables)
+- **Isolation:** Separate database + `TenantId` on tenant-scoped entities + global EF query filter + save interceptor + integration tests
+- **Resolution:** JWT `tenant_id` claim, or `X-Tenant-Slug` / subdomain (Development); never trust client-supplied `TenantId` in body
+- **Provisioning:** `ITenantDatabaseProvisioner` creates DB, migrates tenant schema, copies permission catalog; `POST /api/v1/tenants` for onboarding
 
 ## Cross-Cutting Concerns (Every Module)
 
@@ -218,7 +242,7 @@ Shared kernel: solution structure, multi-tenancy, MediatR pipeline, outbox/event
 
 | Feature | Description |
 |---|---|
-| Solution scaffolding | Clean Architecture projects, module folders |
+| Solution scaffolding | Clean Architecture projects (`SchoolSaaS.*`); optional future `Modules/` split |
 | Multi-tenancy | `ITenantContext`, query filters, save interceptor |
 | MediatR pipeline | Validation, logging, tenant, authorization, audit behaviors |
 | Event bus | Outbox pattern, RabbitMQ publisher, idempotent consumers |
@@ -228,7 +252,9 @@ Shared kernel: solution structure, multi-tenancy, MediatR pipeline, outbox/event
 
 ### Key Entities
 
-`Tenant`, `TenantSetting`, `OutboxMessage`, `ProcessedEvent`
+**Platform DB:** `Tenant`, `TenantSetting`, global `Permission` catalog  
+
+**Per-tenant DB:** `OutboxMessage`, `ProcessedEvent`, `TenantIsolationProbe` (and all domain modules)
 
 ### Dependencies
 
@@ -257,10 +283,11 @@ Register, authenticate, and manage users across tenants. JWT + refresh token API
 
 | Feature | MVP | Phase 2+ |
 |---|---|---|
-| User registration & invitation | ✅ | |
+| User registration (API) | ✅ | |
+| User invitation | | ✅ |
 | Login / logout | ✅ | |
 | JWT + refresh token rotation | ✅ | |
-| Password reset & change | ✅ | |
+| Password reset & change | | ✅ (not in API yet) |
 | Account lockout | ✅ | |
 | MFA (TOTP) | | ✅ |
 | Device management | | ✅ |
@@ -282,17 +309,19 @@ users.manage
 
 ### APIs
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/api/v1/auth/login` | Login |
-| POST | `/api/v1/auth/refresh` | Refresh token |
-| POST | `/api/v1/auth/logout` | Logout |
-| POST | `/api/v1/auth/register` | Register |
-| POST | `/api/v1/auth/forgot-password` | Initiate reset |
-| POST | `/api/v1/auth/reset-password` | Complete reset |
-| GET | `/api/v1/auth/me` | Current user |
-| PUT | `/api/v1/auth/me/password` | Change password |
-| POST | `/api/v1/users/invite` | Admin invite |
+| Method | Endpoint | Status | Purpose |
+|---|---|---|---|
+| POST | `/api/v1/auth/login` | ✅ | Login (email + password; tenant required) |
+| POST | `/api/v1/auth/refresh` | ✅ | Refresh token |
+| POST | `/api/v1/auth/logout` | ✅ | Logout |
+| POST | `/api/v1/auth/register` | ✅ | Register |
+| GET | `/api/v1/auth/me` | ✅ | Current user |
+| POST | `/api/v1/auth/forgot-password` | ✅ | Initiate reset (email via `LogEmailSender`) |
+| POST | `/api/v1/auth/reset-password` | ✅ | Complete reset |
+| PUT | `/api/v1/auth/me/password` | ✅ | Change password |
+| POST | `/api/v1/auth/accept-invitation` | ✅ | Accept invite |
+| POST | `/api/v1/users/invite` | ✅ | Admin invite |
+| GET | `/api/v1/audit-logs` | ✅ | Paged tenant audit log |
 
 ### Events
 
@@ -334,7 +363,7 @@ Fine-grained, scope-aware role-based access control at API and UI levels.
 
 ### Default Roles
 
-`SuperAdmin`, `TenantAdmin`, `Principal`, `Teacher`, `Accountant`, `Parent`, `Student`
+`tenant_admin` (seeded in demo tenant), `Principal`, `Teacher`, … — **`super_admin` role exists in JWT middleware only; not seeded**
 
 ### Scope Types
 
@@ -429,7 +458,7 @@ permissions.read
 audit.logs.read
 audit.logs.export
 audit.logs.read-all-tenant      # tenant admin — own tenant
-audit.logs.read-platform        # super admin — cross-tenant
+audit.logs.read-platform        # planned — platform super admin cross-tenant (not implemented)
 ```
 
 ### MediatR Pipeline (logging-aware)
@@ -460,12 +489,12 @@ Tenant onboarding and organizational skeleton: academic years, grades, classes, 
 
 | Feature | MVP | Phase 2+ |
 |---|---|---|
-| Tenant provisioning | ✅ | |
-| Tenant suspend/activate | ✅ | |
-| Academic years & terms | ✅ | |
-| Grades, classes, sections | ✅ | |
-| Subjects & curriculum mapping | ✅ | |
-| Staff profiles & user linking | ✅ | |
+| Tenant provisioning (`POST /api/v1/tenants`) | ✅ | |
+| Tenant suspend/activate | | ✅ |
+| Academic years & terms | | ✅ |
+| Grades, classes, sections | | ✅ |
+| Subjects & curriculum mapping | | ✅ |
+| Staff profiles & user linking | | ✅ |
 | Branches/campuses | | ✅ |
 | Departments | | ✅ |
 | Subscription plans | | ✅ |
@@ -479,8 +508,8 @@ Tenant onboarding and organizational skeleton: academic years, grades, classes, 
 ### Permissions
 
 ```
-institution.tenant.create       # super-admin
-institution.tenant.manage
+institution.tenant.create       # implemented — demo tenant_admin; future: platform super-admin
+institution.tenant.manage       # not implemented
 institution.academic-years.manage
 institution.classes.manage
 institution.subjects.manage
@@ -1031,7 +1060,7 @@ CI/CD, containerization, VPS deployment, monitoring, backups.
 | Nginx + SSL | ✅ | |
 | Health checks | ✅ | |
 | Structured logging (Serilog) | ✅ | |
-| PostgreSQL backups | ✅ | |
+| MySQL backups (platform + tenant DBs) | ✅ | |
 | Seq / Elasticsearch | | ✅ |
 | Prometheus + Grafana | | ✅ |
 | Kubernetes + Helm | | ✅ |
@@ -1139,23 +1168,22 @@ Level 5: Subtask         → e.g. Create StudentGuardianEntity
 school/
 ├── src/
 │   ├── SchoolSaaS.Api/
+│   │   └── Endpoints/               Auth, Users, Tenants, Audit, Platform
 │   ├── SchoolSaaS.Application/
+│   │   ├── Commands/
+│   │   │   ├── Auth/                Login, Logout, Register, ForgotPassword, …
+│   │   │   ├── Users/               InviteUser
+│   │   │   └── Tenants/             CreateTenant
+│   │   ├── Queries/
+│   │   │   ├── Auth/                GetCurrentUser
+│   │   │   ├── Audit/               ListAuditLogs
+│   │   │   └── Platform/            Ping
+│   │   ├── Abstractions/
+│   │   └── Behaviors/
 │   ├── SchoolSaaS.Domain/
 │   ├── SchoolSaaS.Infrastructure/
-│   ├── SchoolSaaS.Shared/
-│   └── Modules/
-│       ├── Platform/
-│       ├── Identity/
-│       ├── Institution/
-│       ├── Students/
-│       ├── Attendance/
-│       ├── Fees/
-│       ├── Finance/
-│       ├── Lms/
-│       ├── Notifications/
-│       ├── Audit/
-│       ├── Reporting/
-│       └── Social/
+│   └── SchoolSaaS.Shared/
+│   # Future (optional): src/Modules/{ModuleName}/…
 ├── frontend/                  # Angular 19 admin
 ├── mobile/                    # Flutter (parent + student)
 ├── tests/

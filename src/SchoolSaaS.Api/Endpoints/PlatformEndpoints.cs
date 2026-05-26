@@ -1,6 +1,6 @@
 using Asp.Versioning;
 using MediatR;
-using SchoolSaaS.Application.Platform.Queries;
+using SchoolSaaS.Application.Queries.Platform.Ping;
 using SchoolSaaS.Shared.Results;
 
 namespace SchoolSaaS.Api.Endpoints;

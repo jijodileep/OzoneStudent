@@ -8,7 +8,7 @@ public sealed class Tenant : PlatformEntity, IAggregateRoot
 
     public string Slug { get; set; } = string.Empty;
 
-    // Data DB location (supports tenants on different MySQL servers).
+    /// <summary>MySQL host for this tenant (dedicated server per institute).</summary>
     public string DbServer { get; set; } = "localhost";
 
     public int DbPort { get; set; } = 3306;
@@ -17,6 +17,7 @@ public sealed class Tenant : PlatformEntity, IAggregateRoot
 
     public string DbUser { get; set; } = string.Empty;
 
+    /// <summary>Encrypted at rest via <c>ITenantDbCredentialProtector</c> (platform catalog only).</summary>
     public string DbPassword { get; set; } = string.Empty;
 
     public TenantStatus Status { get; set; } = TenantStatus.Pending;

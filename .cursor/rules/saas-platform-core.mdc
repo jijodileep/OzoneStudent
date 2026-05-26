@@ -16,9 +16,10 @@ alwaysApply: true
 
 ## Module Boundaries
 
-- Modular monolith: `src/Modules/{ModuleName}/` owns Domain + Application for that module.
+- **As implemented:** layered monolith — `SchoolSaaS.Domain`, `SchoolSaaS.Application` (`Commands/`, `Queries/`), `SchoolSaaS.Infrastructure`, `SchoolSaaS.Api`.
+- **Future:** optional `src/Modules/{ModuleName}/` split; do not create until planned.
 - Modules communicate via **integration events** (outbox), not direct repository access across modules.
-- Shared abstractions live in `SchoolSaaS.Shared` or `SchoolSaaS.Domain` (base entities, interfaces only).
+- Shared abstractions live in `SchoolSaaS.Shared` or `SchoolSaaS.Application/Abstractions` (ports) and `SchoolSaaS.Domain` (entities).
 
 ## Naming
 
@@ -29,4 +30,4 @@ alwaysApply: true
 
 ## When Implementing a Backlog Task
 
-Reference task ID from `backlog/mvp-phase1-linear-import.csv`. Deliver: entity (if new), command/query + handler, validator, endpoint, migration, unit test, integration test (if DB).
+Reference task ID from `backlog/mvp-phase1-linear-import.csv`. Deliver: entity (if new), folder under `Application/Commands/{Area}/{Endpoint}/` or `Queries/...`, validator, API endpoint, migration, unit test, integration test (if DB).

@@ -6,27 +6,48 @@ alwaysApply: false
 
 # CQRS + MediatR Patterns
 
+## Folder layout (one folder per endpoint)
+
+Place each command/query with its handler + validator under `Commands/` or `Queries/`, grouped by API route group and endpoint:
+
+```text
+Application/
+  Commands/
+    Auth/
+      Login/              LoginCommand.cs, LoginCommandHandler.cs, LoginCommandValidator.cs
+      ForgotPassword/
+      AcceptInvitation/
+    Users/
+      InviteUser/
+    Tenants/
+      CreateTenant/
+  Queries/
+    Auth/
+      GetCurrentUser/     GetCurrentUserQuery.cs, GetCurrentUserQueryHandler.cs
+    Audit/
+      ListAuditLogs/
+    Platform/
+      Ping/
+```
+
+Namespace matches the path, e.g. `SchoolSaaS.Application.Commands.Auth.Login` or `SchoolSaaS.Application.Queries.Auth.GetCurrentUser`.
+
+Shared abstractions stay in `Application/Abstractions/`. Cross-cutting behaviors stay in `Application/Behaviors/`.
+
 ## Command Template
 
 ```csharp
-// Command — immutable record
-public record CreateStudentCommand(string FirstName, string LastName, Guid ClassId) : IRequest<Result<Guid>>;
+// Application/Commands/Students/CreateStudent/CreateStudentCommand.cs
+namespace SchoolSaaS.Application.Commands.Students.CreateStudent;
 
-// Handler — inject ITenantContext, IAuditService, IRepository
-public class CreateStudentCommandHandler : IRequestHandler<CreateStudentCommand, Result<Guid>>
-{
-    public async Task<Result<Guid>> Handle(CreateStudentCommand request, CancellationToken ct)
-    {
-        // 1. Validate business rules
-        // 2. Create entity, stamp TenantId from ITenantContext
-        // 3. Save via IUnitOfWork
-        // 4. Raise domain event / outbox integration event
-        // 5. Return Result.Success(id)
-    }
-}
+public sealed record CreateStudentCommand(string FirstName, string LastName, Guid ClassId)
+    : ICommand<Guid>;
 
-// Validator — separate class
-public class CreateStudentValidator : AbstractValidator<CreateStudentCommand> { }
+// CreateStudentCommandHandler.cs — same folder
+public sealed class CreateStudentCommandHandler : IRequestHandler<CreateStudentCommand, Result<Guid>> { ... }
+
+// CreateStudentCommandValidator.cs — same folder
+public sealed class CreateStudentCommandValidator : AbstractValidator<CreateStudentCommand> { }
 ```
 
 ## Query Rules

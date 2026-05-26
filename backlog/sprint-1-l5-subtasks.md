@@ -1,5 +1,7 @@
 # Sprint 1 — L5 Technical Subtask Expansion (Critical Path)
 
+> **Implementation note (May 2026):** Paths like `src/Modules/…` and PostgreSQL references below are **planning targets**. The repo uses **MySQL 8**, **per-tenant databases** (`ss_t_{slug}`), **`src/SchoolSaaS.*`**, and CQRS folders **`Application/Commands/{Area}/{Endpoint}/`** and **`Application/Queries/{Area}/{Endpoint}/`**. Map subtasks to current projects when implementing.
+
 **Sprint:** 1 (Weeks 1–2)  
 **Goal:** Solution builds, tenant isolation proven, outbox works, CI green, Docker local stack running  
 **Epic:** Platform Foundation + DevOps baseline  
@@ -32,7 +34,7 @@ Do NOT implement tasks outside this subtask scope.
 | Day | L4 Tasks | Owner |
 |---|---|---|
 | **D1** | CreateSolutionStructure, DefineResultPattern, CreateTestProjectStructure | Backend |
-| **D2** | DefineBaseEntity, ConfigureEfCorePostgreSql, CreateTenantsTableMigration | Backend |
+| **D2** | DefineBaseEntity, ConfigureEfCoreMySql, CreateTenantsTableMigration (platform DB) | Backend |
 | **D3** | DefineITenantContext, ImplementTenantContextMiddleware, CreateTenantQueryFilter | Backend |
 | **D4** | CreateTenantSaveChangesInterceptor, RegisterMediatRPipeline, CreateValidationBehavior | Backend |
 | **D5** | CreateLoggingBehavior, CreateTenantBehavior, DefineGlobalExceptionHandler | Backend |
@@ -150,13 +152,13 @@ Architecture test (added later) confirms Domain has no EF references.
 
 ## L5 Subtasks
 
-- [ ] **4.1** Add NuGet: `Npgsql.EntityFrameworkCore.PostgreSQL`, `EFCore.NamingConventions` to Infrastructure
+- [x] **4.1** Add NuGet: `Pomelo.EntityFrameworkCore.MySql` (or equivalent), `EFCore.NamingConventions` to Infrastructure — **done** (was planned as Npgsql/PostgreSQL)
 - [ ] **4.2** Create `ApplicationDbContext.cs` in Infrastructure/Persistence
 - [ ] **4.3** Configure snake_case: `.UseSnakeCaseNamingConvention()` in options
 - [ ] **4.4** Create `IUnitOfWork` in Domain + `UnitOfWork` implementation wrapping DbContext
 - [ ] **4.5** Create `DependencyInjection.cs` extension: `AddInfrastructure(services, configuration)`
 - [ ] **4.6** Read connection string from `ConnectionStrings:DefaultConnection`
-- [ ] **4.7** Add `appsettings.Development.json` with local PostgreSQL connection string
+- [x] **4.7** Add `appsettings.Development.json` with local **MySQL** connection strings (`Platform`, `Provisioning`) — **done**
 - [ ] **4.8** Register DbContext as scoped in DI
 - [ ] **4.9** Add EF Core design-time factory for migrations CLI
 - [ ] **4.10** Wire Infrastructure DI from `Program.cs`
@@ -575,7 +577,7 @@ Set cache for tenant A; tenant B cannot read it.
 - [ ] **25.3** Create `tests/SchoolSaaS.ArchitectureTests` (NetArchTest.Rules)
 - [ ] **25.4** Add all test projects to solution
 - [ ] **25.5** Add CI-friendly `runsettings` for code coverage (optional)
-- [ ] **25.6** Create `IntegrationTestBase` with WebApplicationFactory + PostgreSQL container
+- [x] **25.6** Create `IntegrationTestBase` with WebApplicationFactory + **MySQL** container (Testcontainers) — **done**
 
 ## Verification
 
@@ -632,7 +634,7 @@ Test fails if query filter removed — confirms test validity.
 ## L5 Subtasks
 
 - [ ] **28.1** Create `docker/docker-compose.yml`:
-  - `postgres:16` — port 5432, volume, healthcheck
+  - `mysql:8.0` — port 3306, volume, healthcheck (as in `docker/docker-compose.yml`)
   - `redis:7` — port 6379
   - `rabbitmq:3-management` — ports 5672, 15672
 - [ ] **28.2** Create `docker/.env.example` with default credentials
@@ -683,7 +685,7 @@ curl http://localhost:8080/health
 - [ ] **30.2** Trigger: pull_request to `main` and `develop`
 - [ ] **30.3** Jobs: `build-and-test`
   - Setup .NET 9
-  - Start PostgreSQL + Redis + RabbitMQ services
+  - Start MySQL + Redis + RabbitMQ services
   - `dotnet restore`, `dotnet build --no-restore`
   - `dotnet test --no-build --verbosity normal`
 - [ ] **30.4** Fail PR if any test fails or build has warnings (TreatWarningsAsErrors)
@@ -703,7 +705,7 @@ Push branch → GitHub Actions runs green.
 |---|---|---|
 | 1 | `dotnet build` zero warnings | [ ] |
 | 2 | `dotnet test` all pass including architecture + tenant isolation | [ ] |
-| 3 | `docker compose up` starts postgres, redis, rabbitmq | [ ] |
+| 3 | `docker compose up` starts mysql, redis, rabbitmq | [ ] |
 | 4 | API Docker image builds and `/health` responds | [ ] |
 | 5 | CI pipeline green on PR | [ ] |
 | 6 | Tenant query filter enforced (integration test) | [ ] |

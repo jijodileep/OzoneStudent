@@ -1,6 +1,7 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3306;Database=schoolsaas_dev;User=root;Password=YOUR_PASSWORD_HERE",
+    "Platform": "Server=localhost;Port=3306;Database=schoolsaas_platform;User=root;Password=YOUR_PASSWORD_HERE",
+    "Provisioning": "Server=localhost;Port=3306;User=root;Password=YOUR_PASSWORD_HERE",
     "Redis": "localhost:6379,abortConnect=false"
   },
   "Redis": {

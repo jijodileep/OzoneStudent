@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using SchoolSaaS.Infrastructure.Persistence;
+using SchoolSaaS.Infrastructure.Persistence.Platform;
 using SchoolSaaS.Shared.MultiTenancy;
 
 namespace SchoolSaaS.Api.Middleware;
@@ -10,16 +10,15 @@ public sealed class TenantContextMiddleware(
     IConfiguration configuration,
     ILogger<TenantContextMiddleware> logger)
 {
-    private static readonly string[] ExcludedPathPrefixes =
+  private static readonly string[] TenantResolutionSkippedPrefixes =
     [
         "/health",
-        "/swagger",
-        "/api/v1/auth/login"
+        "/swagger"
     ];
 
     public async Task InvokeAsync(HttpContext context, TenantContext tenantContext)
     {
-        if (IsExcludedPath(context.Request.Path))
+        if (IsTenantResolutionSkipped(context.Request.Path))
         {
             await next(context);
             return;
@@ -51,9 +50,7 @@ public sealed class TenantContextMiddleware(
 
             if (!string.IsNullOrWhiteSpace(slug))
             {
-                // ApplicationDbContext can query Tenants even without tenant context because
-                // platform entities are excluded from tenant filtering.
-                var db = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+                var db = context.RequestServices.GetRequiredService<PlatformDbContext>();
                 var tenantId = await db.Tenants
                     .Where(t => t.Slug == slug)
                     .Select(t => (Guid?)t.Id)
@@ -109,10 +106,10 @@ public sealed class TenantContextMiddleware(
         return null;
     }
 
-    private static bool IsExcludedPath(PathString path)
+    private static bool IsTenantResolutionSkipped(PathString path)
     {
         var value = path.Value ?? string.Empty;
-        return ExcludedPathPrefixes.Any(prefix =>
+        return TenantResolutionSkippedPrefixes.Any(prefix =>
             value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
     }
 

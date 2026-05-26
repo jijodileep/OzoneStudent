@@ -16,8 +16,7 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
             .AddJsonFile("appsettings.Development.local.json", optional: true)
             .Build();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost;Port=3306;Database=schoolsaas;User=root;Password=password";
+        var connectionString = DesignTimeConnectionStrings.ResolveTenantMigration(configuration);
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder

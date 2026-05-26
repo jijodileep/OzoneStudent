@@ -57,7 +57,8 @@ jobs:
 
       - name: Test
         env:
-          ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=schoolsaas_test;User=root;Password=password;
+          ConnectionStrings__Platform: Server=127.0.0.1;Port=3306;Database=schoolsaas_platform;User=root;Password=password;
+          ConnectionStrings__Provisioning: Server=127.0.0.1;Port=3306;User=root;Password=password;
           ConnectionStrings__Redis: 127.0.0.1:6379,abortConnect=false
           Redis__ConnectionString: 127.0.0.1:6379,abortConnect=false
           Outbox__Enabled: "false"

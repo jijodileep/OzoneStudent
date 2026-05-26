@@ -1,5 +1,17 @@
 # MVP Phase 1 — All Sprints (Master Sprint Document)
 
+## Implementation alignment (May 2026)
+
+- **Database:** MySQL 8 — `schoolsaas_platform` + `ss_t_{slug}` per tenant (see [`README.md`](../README.md)).
+- **Code:** `src/SchoolSaaS.{Api,Application,Domain,Infrastructure,Shared}/` (not `src/Modules/*` yet).
+- **CQRS paths:** `Application/Commands/{Area}/{Endpoint}/`, `Application/Queries/{Area}/{Endpoint}/` (e.g. `Commands/Auth/Login/`, `Queries/Audit/ListAuditLogs/`).
+- **Done early:** tenant isolation, full Sprint 2 auth/audit APIs, `POST /api/v1/tenants`, permission catalog seeding.
+- **Not done:** super-admin seed, suspend tenant, academic/student/fees domains, Angular/mobile wiring.
+
+Task tables below remain the **backlog**; verify the repo before assuming a row is still Todo.
+
+---
+
 **Phase:** MVP Phase 1  
 **Duration:** 12 weeks / 6 sprints (2 weeks each)  
 **Goal:** Operable multi-tenant SaaS — onboard schools, manage students, mark attendance, collect fees, parent views data  
@@ -97,7 +109,7 @@ Solution builds cleanly, multi-tenancy is proven, outbox pattern works, CI is gr
 ```
 CreateSolutionStructure
 DefineBaseEntity
-ConfigureEfCorePostgreSql
+ConfigureEfCoreMySql
 DefineITenantContext
 ImplementTenantContextMiddleware
 CreateTenantQueryFilter
@@ -126,7 +138,7 @@ CiBuildApiWorkflow
 |---|---|---|
 | CreateSolutionStructure | Platform Foundation | 3 |
 | DefineBaseEntity | Platform Foundation | 2 |
-| ConfigureEfCorePostgreSql | Platform Foundation | 3 |
+| ConfigureEfCoreMySql | Platform Foundation | 3 |
 | DefineITenantContext | Platform Foundation | 2 |
 | ImplementTenantContextMiddleware | Platform Foundation | 3 |
 | CreateTenantQueryFilter | Platform Foundation | 3 |
@@ -161,7 +173,7 @@ CiBuildApiWorkflow
 |---|---|---|
 | 1 | `dotnet build` zero warnings | [ ] |
 | 2 | `dotnet test` all pass including architecture + tenant isolation | [ ] |
-| 3 | `docker compose up` starts postgres, redis, rabbitmq | [ ] |
+| 3 | `docker compose up` starts mysql, redis, rabbitmq | [ ] |
 | 4 | API Docker image builds and `/health` responds | [ ] |
 | 5 | CI pipeline green on PR | [ ] |
 | 6 | Tenant query filter enforced (integration test) | [ ] |
@@ -328,10 +340,10 @@ RoleListPageComponent → PermissionMatrixComponent
 
 | Task | Epic | SP |
 |---|---|---|
-| CreateTenantCommand | Institution Management | 3 |
-| TenantProvisioningService | Institution Management | 5 |
-| SuspendTenantCommand | Institution Management | 2 |
-| CreateTenantEndpoint | Institution Management | 1 |
+| CreateTenantCommand | Institution Management | 3 | ✅ implemented |
+| TenantProvisioningService (`ITenantOnboardingService`) | Institution Management | 5 | ✅ implemented |
+| SuspendTenantCommand | Institution Management | 2 | |
+| CreateTenantEndpoint | Institution Management | 1 | ✅ implemented |
 | GetCurrentTenantEndpoint | Institution Management | 1 |
 | TenantProvisioningIntegrationTest | Institution Management | 3 |
 | CreateAcademicYearEntity | Institution Management | 2 |
@@ -716,7 +728,7 @@ flowchart LR
 
 ### Context
 - Project: Multi-tenant Student Management SaaS
-- Stack: ASP.NET Core 9, Clean Architecture, CQRS/MediatR, EF Core, PostgreSQL
+- Stack: ASP.NET Core 9, Clean Architecture, CQRS/MediatR, EF Core, MySQL (platform + per-tenant DBs)
 - Module: {ModuleName}
 - Rules: .cursor/rules/ (auto-apply)
 

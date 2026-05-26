@@ -63,7 +63,8 @@ services:
       - "${API_PORT:-8080}:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-schoolsaas_dev};User=root;Password=${MYSQL_ROOT_PASSWORD:-password};
+      ConnectionStrings__Platform: Server=mysql;Port=3306;Database=schoolsaas_platform;User=root;Password=${MYSQL_ROOT_PASSWORD:-password};
+      ConnectionStrings__Provisioning: Server=mysql;Port=3306;User=root;Password=${MYSQL_ROOT_PASSWORD:-password};
       ConnectionStrings__Redis: redis:6379,abortConnect=false
       Redis__ConnectionString: redis:6379,abortConnect=false
       Redis__InstancePrefix: schoolsaas:docker

@@ -10,7 +10,7 @@ namespace SchoolSaaS.UnitTests.Persistence;
 public class TenantSaveChangesInterceptorTests
 {
     [Fact]
-    public async Task AddedTenantSetting_GetsTenantIdStamped()
+    public async Task AddedTenantIsolationProbe_GetsTenantIdStamped()
     {
         var tenantId = Guid.NewGuid();
         var tenantContext = new TenantContext { TenantId = tenantId };
@@ -24,15 +24,11 @@ public class TenantSaveChangesInterceptorTests
             .Options;
 
         await using var context = new ApplicationDbContext(options, accessor);
-        context.TenantSettings.Add(new TenantSetting
-        {
-            Key = "timezone",
-            Value = "UTC"
-        });
+        context.TenantIsolationProbes.Add(new TenantIsolationProbe { Label = "probe" });
 
         await context.SaveChangesAsync();
 
-        var saved = await context.TenantSettings.IgnoreQueryFilters().FirstAsync();
+        var saved = await context.TenantIsolationProbes.IgnoreQueryFilters().FirstAsync();
         saved.TenantId.Should().Be(tenantId);
         saved.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }

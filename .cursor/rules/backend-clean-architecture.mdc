@@ -17,25 +17,22 @@ Domain ← Application ← Infrastructure ← Api
 - **Infrastructure**: EF configurations, repositories, external services, event handlers.
 - **Api**: Minimal API endpoints, middleware, DI registration. Thin — delegate to MediatR.
 
-## Module Folder Structure
+## Project Folder Structure (as implemented)
 
+```text
+src/
+  SchoolSaaS.Domain/           Entities, domain events
+  SchoolSaaS.Application/
+    Commands/{Area}/{Endpoint}/   e.g. Auth/Login/, Tenants/CreateTenant/
+    Queries/{Area}/{Endpoint}/    e.g. Auth/GetCurrentUser/, Audit/ListAuditLogs/
+    Abstractions/                 Repository and service interfaces
+    Behaviors/                    MediatR pipeline
+  SchoolSaaS.Infrastructure/   EF, JWT, repositories, outbox
+  SchoolSaaS.Api/
+    Endpoints/                   Maps HTTP → MediatR (Auth, Users, Tenants, …)
 ```
-src/Modules/{Module}/
-  Domain/
-    Entities/
-    Events/
-    Interfaces/
-  Application/
-    Commands/
-    Queries/
-    Validators/
-    DTOs/
-  Infrastructure/
-    Persistence/
-    Configurations/
-  Api/
-    Endpoints/
-```
+
+Future optional layout: `src/Modules/{Module}/` with the same Commands/Queries pattern inside each module.
 
 ## Do NOT
 

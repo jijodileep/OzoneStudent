@@ -1,6 +1,6 @@
 ---
 description: Institution Management — tenants, academic structure, staff
-globs: src/**/Modules/Institution/**/*
+globs: src/SchoolSaaS.Application/Commands/Tenants/**,src/SchoolSaaS.Domain/Platform/**,src/SchoolSaaS.Api/Endpoints/TenantEndpoints.cs
 alwaysApply: false
 ---
 
@@ -27,7 +27,11 @@ institution.staff.manage
 
 ## Commands (MVP)
 
-- `CreateTenantCommand`, `SuspendTenantCommand`, `ActivateTenantCommand`
+| Implemented | Path |
+|-------------|------|
+| `CreateTenantCommand` | `Application/Commands/Tenants/CreateTenant/` |
+
+- `SuspendTenantCommand`, `ActivateTenantCommand` (not yet)
 - `CreateAcademicYearCommand`, `SetCurrentAcademicYearCommand`
 - `CreateGradeCommand`, `CreateClassCommand`, `CreateSectionCommand`
 - `AssignClassTeacherCommand`, `CreateSubjectCommand`, `AssignSubjectToClassCommand`

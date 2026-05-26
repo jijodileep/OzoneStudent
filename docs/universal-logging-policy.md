@@ -11,7 +11,7 @@ This policy applies to **all modules**, **all clients** (Admin Web, Parent App, 
 
 | Layer | Storage | Purpose | Retention |
 |---|---|---|---|
-| **Audit Log** | PostgreSQL `audit_logs` (append-only) | Compliance, forensics, admin viewer | 7 years (configurable) |
+| **Audit Log** | MySQL `audit_logs` in **each tenant database** (`ApplicationDbContext`, append-only) | Compliance, forensics, admin viewer | 7 years (configurable) |
 | **Operational Log** | Serilog → Seq/Elasticsearch/console | Debugging, monitoring, performance | 90 days hot, then archive |
 
 Both layers must include: `TenantId`, `UserId`, `CorrelationId`, `Timestamp`, `IpAddress`, `UserAgent`.

@@ -1,9 +1,18 @@
 # Module-Wise ER Diagrams
 ## Student Management SaaS Platform
 
-**Version:** 1.0  
-**Database:** PostgreSQL (shared schema, multi-tenant)  
-**Convention:** All tenant-scoped tables include `tenant_id`. Platform tables (e.g. `tenants`) are exempt from tenant filter.
+**Version:** 1.1  
+**Database:** **MySQL 8** — **database-per-tenant** (not a single shared schema)  
+**As implemented (May 2026):**
+
+| Store | EF context | Typical database | Tables in scope today |
+|-------|------------|------------------|------------------------|
+| Platform catalog | `PlatformDbContext` | `schoolsaas_platform` | `tenants`, `tenant_settings`, `permissions` (catalog) |
+| Per-tenant app data | `ApplicationDbContext` | `ss_t_{slug}` on tenant `db_server` | users, RBAC, `audit_logs`, outbox, `tenant_isolation_probes` |
+
+Diagrams below still show logical **module** relationships. Physical placement: platform-only entities live only in the platform DB; tenant-scoped entities live only in that tenant’s DB (each row still has `tenant_id` for filters and tests).
+
+**Convention:** Tenant-scoped tables include `tenant_id`. The `tenants` registry is **not** replicated into tenant databases.
 
 ---
 

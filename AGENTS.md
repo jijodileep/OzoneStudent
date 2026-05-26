@@ -18,12 +18,84 @@ Multi-tenant Student Management SaaS. Modular monolith, ASP.NET Core 9, Angular 
 
 | Layer | Location |
 |---|---|
-| Backend modules | `src/Modules/{ModuleName}/` |
-| Shared kernel | `src/SchoolSaaS.Shared/`, `src/SchoolSaaS.Domain/` |
 | API host | `src/SchoolSaaS.Api/` |
-| Angular admin | `frontend/src/app/` |
-| Flutter parent app | `mobile/lib/` |
+| Application (CQRS) | `src/SchoolSaaS.Application/` — `Commands/{Area}/{Endpoint}/`, `Queries/{Area}/{Endpoint}/` |
+| Domain entities | `src/SchoolSaaS.Domain/` |
+| Infrastructure (EF, JWT, outbox) | `src/SchoolSaaS.Infrastructure/` |
+| Shared (results, tenancy, permissions) | `src/SchoolSaaS.Shared/` |
+| Angular admin | `frontend/src/app/` (scaffold; not wired to all APIs yet) |
+| Flutter parent app | `mobile/lib/` (scaffold) |
 | Tests | `tests/` |
+
+**As implemented:** layered monolith under `src/SchoolSaaS.*`. Future modular split may move code to `src/Modules/{ModuleName}/` per the master plan — do not assume that folder exists yet.
+
+### CQRS folder layout (Application layer)
+
+One folder per **endpoint operation**. Namespace = folder path.
+
+```text
+SchoolSaaS.Application/
+  Commands/
+    Auth/Login/              LoginCommand, LoginCommandHandler, LoginCommandValidator
+    Auth/Logout/
+    Auth/RefreshToken/
+    Auth/Register/
+    Auth/ForgotPassword/
+    Auth/ResetPassword/
+    Auth/ChangePassword/
+    Auth/AcceptInvitation/
+    Users/InviteUser/
+    Tenants/CreateTenant/
+  Queries/
+    Auth/GetCurrentUser/
+    Audit/ListAuditLogs/
+    Platform/Ping/
+  Abstractions/              Ports (IUserRepository, IAuditService, …)
+  Behaviors/                 Validation, Authorization, Audit, Tenant, Logging
+  Common/                    ICommand<T>, IQuery<T>, IPlatformCommand
+```
+
+| API route group | Commands / queries path |
+|-----------------|-------------------------|
+| `/api/v1/auth/*` | `Commands/Auth/{Operation}/` or `Queries/Auth/GetCurrentUser/` |
+| `/api/v1/users/*` | `Commands/Users/InviteUser/` |
+| `/api/v1/tenants` | `Commands/Tenants/CreateTenant/` |
+| `/api/v1/audit-logs` | `Queries/Audit/ListAuditLogs/` |
+| `/api/v1/ping` | `Queries/Platform/Ping/` |
+
+**Namespace examples:** `SchoolSaaS.Application.Commands.Auth.Login`, `SchoolSaaS.Application.Queries.Audit.ListAuditLogs`.
+
+Do **not** use legacy paths `Identity/Commands`, `Platform/Commands`, or flat `Application/Auth/`.
+
+### Databases (MySQL)
+
+| Context | Database | Contents |
+|---------|----------|----------|
+| `PlatformDbContext` | `schoolsaas_platform` | `tenants`, `tenant_settings`, global `permissions` catalog |
+| `ApplicationDbContext` | `ss_t_{slug}` per tenant | users, RBAC, `audit_logs`, outbox, app data |
+
+Never accept `TenantId` from the client body — resolve via JWT / `X-Tenant-Slug` / subdomain (`ITenantContext`). Platform commands use `IPlatformCommand` and `PlatformDbContext`.
+
+### Implemented API surface (MVP in progress)
+
+| Method | Path | Notes |
+|--------|------|--------|
+| POST | `/api/v1/auth/login` | Requires tenant (`X-Tenant-Slug` or subdomain) |
+| POST | `/api/v1/auth/refresh` | |
+| POST | `/api/v1/auth/logout` | |
+| POST | `/api/v1/auth/register` | |
+| POST | `/api/v1/auth/forgot-password` | Anonymous; always returns generic message |
+| POST | `/api/v1/auth/reset-password` | Anonymous; requires `X-Tenant-Slug` |
+| POST | `/api/v1/auth/accept-invitation` | Anonymous; requires `X-Tenant-Slug` |
+| GET | `/api/v1/auth/me` | |
+| PUT | `/api/v1/auth/me/password` | `auth.password.change` |
+| POST | `/api/v1/users/invite` | `users.invite` |
+| GET | `/api/v1/audit-logs` | `audit.logs.read` (paged) |
+| POST | `/api/v1/tenants` | `institution.tenant.create` |
+| GET | `/api/v1/ping` | Authenticated smoke test |
+| GET | `/health`, `/health/ready` | No auth |
+
+**Not implemented yet:** super-admin seed, suspend tenant, real email delivery (uses `LogEmailSender`).
 
 ## Non-Negotiables
 
@@ -66,8 +138,7 @@ When implementing a backlog task, deliver:
 
 - [ ] Domain entity (if new)
 - [ ] EF configuration + migration
-- [ ] Command/Query + Handler
-- [ ] FluentValidation validator
+- [ ] `Commands/{Area}/{Endpoint}/` or `Queries/{Area}/{Endpoint}/` (command/query + handler + validator)
 - [ ] `[RequirePermission]` attribute
 - [ ] Audit logging
 - [ ] API endpoint at `/api/v1/...`
