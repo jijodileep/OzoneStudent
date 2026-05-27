@@ -35,7 +35,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
 
         var errors = failures
             .Select(f => Error.Validation(
-                "validation.failed",
+                string.IsNullOrWhiteSpace(f.ErrorCode) ? "validation.failed" : f.ErrorCode,
                 f.ErrorMessage,
                 f.PropertyName))
             .ToArray();

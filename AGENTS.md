@@ -24,7 +24,7 @@ Multi-tenant Student Management SaaS. Modular monolith, ASP.NET Core 9, Angular 
 | Domain entities | `src/SchoolSaaS.Domain/` |
 | Infrastructure (EF, JWT, outbox) | `src/SchoolSaaS.Infrastructure/` |
 | Shared (results, tenancy, permissions) | `src/SchoolSaaS.Shared/` |
-| Angular admin | `frontend/src/app/` (scaffold; not wired to all APIs yet) |
+| Angular admin | `frontend/src/app/` — login, shell, permission nav, academic years |
 | Flutter parent app | `mobile/lib/` (scaffold) |
 | Tests | `tests/` |
 
@@ -139,7 +139,7 @@ Never accept `TenantId` from the client body — resolve via JWT / `X-Tenant-Slu
 | GET | `/api/v1/ping` | Authenticated smoke test |
 | GET | `/health`, `/health/ready` | No auth |
 
-**Not implemented yet:** super-admin seed, suspend tenant, subjects, Angular admin shell, real email delivery (uses `LogEmailSender`).
+**Not implemented yet:** super-admin seed, suspend tenant, subjects (low priority), remaining institution/settings UI pages, real email delivery (uses `LogEmailSender`).
 
 ## Non-Negotiables
 

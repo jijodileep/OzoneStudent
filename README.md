@@ -1,6 +1,6 @@
 # Student Management SaaS
 
-Multi-tenant student management platform — ASP.NET Core 9 layered monolith, Angular 19 admin (planned), Flutter parent app (planned), **MySQL 8**.
+Multi-tenant student management platform — ASP.NET Core 9 layered monolith, **Angular 19 admin**, Flutter parent app (planned), **MySQL 8**.
 
 ## Current implementation (API)
 
@@ -17,6 +17,7 @@ Multi-tenant student management platform — ASP.NET Core 9 layered monolith, An
 | Staff | `GET/POST/PUT /api/v1/staff`, `POST …/{id}/link-user`, custom fields on create/update (`institution.staff.manage`) |
 | Custom fields | `GET/POST/PUT /api/v1/custom-fields?entityType=Staff|Student` (`institution.staff.fields.manage`) |
 | Documents | `GET/POST/DELETE /api/v1/staff/{id}/documents` (`institution.staff.documents.manage`); student routes ready for Sprint 4 (`students.documents.manage`) |
+| **Angular admin** | Bootstrap 5 UI — login, shell, i18n (en/ar/hi), permission nav, academic years (server-side table, create modal, translated API errors), shared modal / date-picker / data-table |
 | Health | `GET /health`, `GET /health/ready`, `GET /api/v1/ping` |
 | Super-admin user | **Not seeded** — `super_admin` JWT role bypasses RBAC when present |
 | Password reset / invite / audit list | **Implemented** (emails logged via `LogEmailSender` in dev) |
@@ -24,6 +25,12 @@ Multi-tenant student management platform — ASP.NET Core 9 layered monolith, An
 ## Solution layout
 
 ```text
+frontend/src/app/
+  core/                 auth, guards, interceptors, api-error util
+  layout/               app shell, sidebar, global create-academic-year modal
+  features/             auth, dashboard, institution (academic years, …)
+  shared/               modal, date-picker, data-table, placeholders
+public/i18n/            en, ar, hi translations
 src/
   SchoolSaaS.Api/Endpoints/          # one subfolder per module
     Auth/                            AuthEndpoints.cs       (Identity)
@@ -186,10 +193,33 @@ curl http://localhost:5275/health/ready   # includes Redis PING
 curl http://localhost:5275/api/v1/ping  # requires auth
 ```
 
-Build API image:
+## Angular admin (frontend)
+
+See **[frontend/README.md](frontend/README.md)** for structure, shared components, modal/date-picker/data-table usage, API error i18n, and conventions.
+
+Prerequisites: Node.js 20+, npm. API running on `http://localhost:5275` (CORS allows `http://localhost:4200`).
 
 ```bash
-docker build -f docker/Dockerfile.api -t schoolsaas-api .
+cd frontend
+npm install
+npm start
+```
+
+Open http://localhost:4200 — sign in with the [dev login](#dev-login) credentials (tenant slug `demo` is pre-filled).
+
+Dev server proxies `/api` → `http://localhost:5275` via `proxy.conf.json`.
+
+| Feature | Route |
+|---------|--------|
+| Login | `/login` |
+| Dashboard | `/dashboard` |
+| Academic years | `/institution/academic-years` |
+
+Build for production:
+
+```bash
+cd frontend
+npm run build
 ```
 
 ## Tests
@@ -200,11 +230,18 @@ dotnet test tests/SchoolSaaS.ArchitectureTests/SchoolSaaS.ArchitectureTests.cspr
 dotnet test tests/SchoolSaaS.IntegrationTests/SchoolSaaS.IntegrationTests.csproj
 ```
 
+Build API image:
+
+```bash
+docker build -f docker/Dockerfile.api -t schoolsaas-api .
+```
+
 CI runs on every PR via [`.github/workflows/ci-api.yml`](.github/workflows/ci-api.yml). Enable branch protection on `master` to require the **CI — API** check before merge.
 
 ## Documentation
 
 - [Agent guide](AGENTS.md) — architecture, implemented APIs, DB layout
+- [Frontend README](frontend/README.md) — Angular admin components, i18n, patterns
 - [Master module plan](student_management_saas_complete_module_plan.md) — “As implemented” section at top
 - [ER diagrams](docs/module-er-diagrams.md) — logical models (MySQL, DB-per-tenant)
 - [Logging policy](docs/universal-logging-policy.md)

@@ -1,0 +1,30 @@
+.app-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1055;
+}
+
+.app-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.app-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.app-modal .modal-dialog {
+  pointer-events: auto;
+  max-width: 720px;
+}
+
+.app-modal .modal-content,
+.app-modal .modal-body {
+  overflow: visible;
+}

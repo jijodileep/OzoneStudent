@@ -49,10 +49,20 @@ frontend/src/app/
 - Services call API only — no business logic
 - Use signals or RxJS observables consistently (pick signals for new code in Angular 19)
 
-## AG Grid
+## UI stack
+
+- **Bootstrap 5** + **Bootstrap Icons** for layout, forms, tables, and components
+- **Flatpickr** via `app-date-picker` — default date input for all forms
+- **ngx-translate** — runtime i18n (`public/i18n/{en,ar,hi}.json`); language switcher in app shell
+- **RTL** — Arabic sets `dir="rtl"` + Bootstrap RTL stylesheet; extend `LocaleService` for more locales
+- Do not use Angular Material for new UI work
+
+## AG Grid / data tables
 
 - Use shared `DataTableWrapperComponent` for all list pages
-- Standard column defs: actions column last, status as chip, dates formatted via pipe
+- **Server-side mode:** `[serverSide]="true"`, `[totalCount]`, `(queryChange)` → API must return `{ items, totalCount, page, pageSize }`
+- Client-side mode still supported for small/local datasets
+- Standard column defs: actions column last, status as badge, dates via Flatpickr on forms
 
 ## Do NOT
 

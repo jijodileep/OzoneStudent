@@ -1,0 +1,62 @@
+<div class="sidebar-search px-3 pt-2 pb-1">
+  <div class="input-group input-group-sm">
+    <span class="input-group-text sidebar-search-icon">
+      <i class="bi bi-search"></i>
+    </span>
+    <input
+      type="search"
+      class="form-control sidebar-search-input"
+      [placeholder]="'nav.searchPlaceholder' | translate"
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+      [attr.aria-label]="'nav.searchPlaceholder' | translate" />
+    @if (searchQuery()) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary sidebar-search-clear"
+        (click)="clearSearch()"
+        [attr.aria-label]="'nav.clearSearch' | translate">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    }
+  </div>
+</div>
+
+<nav class="nav flex-column sidebar-nav py-2">
+  @if (isSearching() && filteredGroups().length === 0) {
+    <div class="sidebar-no-results px-3 py-2 text-muted small">
+      {{ 'nav.noResults' | translate }}
+    </div>
+  }
+
+  @for (group of filteredGroups(); track group.labelKey) {
+    <div class="sidebar-accordion-item">
+      <button
+        type="button"
+        class="sidebar-accordion-header d-flex align-items-center justify-content-between w-100 px-3 py-2 border-0 bg-transparent"
+        [class.expanded]="isExpanded(group.labelKey)"
+        [attr.aria-expanded]="isExpanded(group.labelKey)"
+        (click)="toggleGroup(group.labelKey)">
+        <span class="sidebar-accordion-title">{{ group.labelKey | translate }}</span>
+        <i
+          class="bi sidebar-accordion-chevron"
+          [class.bi-chevron-down]="isExpanded(group.labelKey)"
+          [class.bi-chevron-end]="!isExpanded(group.labelKey)"></i>
+      </button>
+
+      @if (isExpanded(group.labelKey)) {
+        <div class="sidebar-accordion-body">
+          @for (item of group.items; track item.route) {
+            <a
+              class="nav-link sidebar-link d-flex align-items-center gap-2 px-3 py-2"
+              [routerLink]="item.route"
+              routerLinkActive="active">
+              <i class="bi" [class]="item.icon"></i>
+              <span>{{ item.labelKey | translate }}</span>
+            </a>
+          }
+        </div>
+      }
+    </div>
+  }
+</nav>

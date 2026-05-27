@@ -1,0 +1,25 @@
+<div #host class="app-date-picker" [class.app-date-picker-inline]="inline">
+  <div class="input-group">
+    <input
+      #input
+      type="text"
+      class="form-control app-date-picker-input"
+      [id]="inputId || null"
+      [class.is-invalid]="invalid"
+      [placeholder]="placeholder"
+      [attr.aria-invalid]="invalid"
+      autocomplete="off"
+      inputmode="none"
+      [readonly]="inline" />
+    @if (!inline) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary app-date-picker-toggle"
+        [disabled]="disabled"
+        [attr.aria-label]="placeholder || 'Open calendar'"
+        (click)="open()">
+        <i class="bi bi-calendar-event"></i>
+      </button>
+    }
+  </div>
+</div>

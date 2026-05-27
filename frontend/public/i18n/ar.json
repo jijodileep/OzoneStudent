@@ -1,0 +1,104 @@
+{
+  "app": {
+    "title": "نظام المدارس",
+    "brand": "إدارة نظام المدارس"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "academicYears": "السنوات الدراسية",
+    "grades": "الصفوف والفصول",
+    "staff": "الموظفون",
+    "customFields": "الحقول المخصصة",
+    "roles": "الأدوار",
+    "auditLogs": "سجل التدقيق",
+    "groups": {
+      "main": "الرئيسية",
+      "institution": "المؤسسة",
+      "settings": "الإعدادات"
+    },
+    "searchPlaceholder": "بحث في القائمة...",
+    "clearSearch": "مسح البحث",
+    "noResults": "لم يتم العثور على عناصر"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "tenantSlug": "رمز المستأجر",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "logout": "تسجيل الخروج",
+    "loginFailed": "فشل تسجيل الدخول. تحقق من البيانات وحاول مرة أخرى."
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً، {{name}}",
+    "roles": "الأدوار",
+    "noRoles": "لا توجد أدوار"
+  },
+  "academicYears": {
+    "title": "السنوات الدراسية",
+    "new": "سنة دراسية جديدة",
+    "createTitle": "إنشاء سنة دراسية",
+    "name": "الاسم",
+    "namePlaceholder": "مثال: 2026-27",
+    "nameHint": "تسمية قصيرة للسنة (حد أقصى {{max}} حرف).",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "setAsCurrent": "تعيين كسنة حالية",
+    "save": "حفظ السنة الدراسية",
+    "setCurrent": "تعيين كحالية",
+    "loadFailed": "تعذر تحميل السنوات الدراسية.",
+    "createFailed": "تعذر إنشاء السنة الدراسية.",
+    "setCurrentFailed": "تعذر تعيين السنة الحالية.",
+    "searchPlaceholder": "ابحث بالاسم أو الحالة…"
+  },
+  "table": {
+    "search": "بحث",
+    "clear": "مسح",
+    "empty": "لا توجد سجلات.",
+    "loading": "جاري التحميل…",
+    "showing": "عرض {{from}}–{{to}} من {{total}}",
+    "rows": "صفوف",
+    "name": "الاسم",
+    "period": "الفترة",
+    "status": "الحالة",
+    "current": "حالية",
+    "actions": "إجراءات",
+    "all": "الكل",
+    "allStatuses": "كل الحالات",
+    "currentOnly": "الحالية فقط",
+    "notCurrent": "غير حالية",
+    "statusActive": "نشطة",
+    "statusUpcoming": "قادمة",
+    "statusClosed": "مغلقة",
+    "currentBadge": "حالية"
+  },
+  "common": {
+    "comingSoon": "قريباً",
+    "language": "اللغة",
+    "cancel": "إلغاء",
+    "close": "إغلاق"
+  },
+  "status": {
+    "Active": "نشطة",
+    "Upcoming": "قادمة",
+    "Closed": "مغلقة"
+  },
+  "errors": {
+    "unknown": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "validation": {
+      "failed": "يرجى التحقق من النموذج والمحاولة مرة أخرى."
+    },
+    "institution": {
+      "tenant_required": "سياق المستأجر مطلوب.",
+      "academic_year": {
+        "name_required": "اسم السنة الدراسية مطلوب.",
+        "name_too_long": "يجب ألا يتجاوز اسم السنة الدراسية {{max}} حرف.",
+        "start_date_required": "تاريخ البداية مطلوب.",
+        "end_date_required": "تاريخ النهاية مطلوب.",
+        "end_date_before_start": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البداية.",
+        "name_exists": "توجد سنة دراسية بهذا الاسم بالفعل.",
+        "dates_overlap": "هذه التواريخ تتداخل مع سنة دراسية موجودة."
+      }
+    }
+  }
+}

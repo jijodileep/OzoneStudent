@@ -1,0 +1,21 @@
+.period-cell {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.period-date {
+  color: #212529;
+  white-space: nowrap;
+}
+
+.period-separator {
+  color: #adb5bd;
+  font-size: 0.75rem;
+}
+
+html[dir='rtl'] .period-separator.bi-arrow-right::before {
+  content: '\f12f';
+  transform: scaleX(-1);
+}

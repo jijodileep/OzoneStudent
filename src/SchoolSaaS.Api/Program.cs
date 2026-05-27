@@ -35,7 +35,16 @@ builder.Services.AddSwaggerDocumentation();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
+    options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDev", policy =>
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
 var app = builder.Build();
@@ -48,6 +57,8 @@ if (app.Environment.IsDevelopment()
 
 app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
+
+app.UseCors("FrontendDev");
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 

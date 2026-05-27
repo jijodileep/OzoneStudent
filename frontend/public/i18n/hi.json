@@ -1,0 +1,104 @@
+{
+  "app": {
+    "title": "स्कूल SaaS",
+    "brand": "स्कूल SaaS एडमिन"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "academicYears": "शैक्षणिक वर्ष",
+    "grades": "कक्षाएँ और सेक्शन",
+    "staff": "कर्मचारी",
+    "customFields": "कस्टम फ़ील्ड",
+    "roles": "भूमिकाएँ",
+    "auditLogs": "ऑडिट लॉग",
+    "groups": {
+      "main": "मुख्य",
+      "institution": "संस्थान",
+      "settings": "सेटिंग्स"
+    },
+    "searchPlaceholder": "मेनू खोजें...",
+    "clearSearch": "खोज साफ़ करें",
+    "noResults": "कोई मेनू आइटम नहीं मिला"
+  },
+  "auth": {
+    "signIn": "साइन इन",
+    "tenantSlug": "टेनेंट स्लग",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "logout": "लॉग आउट",
+    "loginFailed": "लॉगिन विफल। क्रेडेंशियल जाँचें और पुनः प्रयास करें।"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "welcome": "स्वागत है, {{name}}",
+    "roles": "भूमिकाएँ",
+    "noRoles": "कोई भूमिका नहीं"
+  },
+  "academicYears": {
+    "title": "शैक्षणिक वर्ष",
+    "new": "नया शैक्षणिक वर्ष",
+    "createTitle": "शैक्षणिक वर्ष बनाएँ",
+    "name": "नाम",
+    "namePlaceholder": "उदा. 2026-27",
+    "nameHint": "वर्ष के लिए छोटा लेबल (अधिकतम {{max}} अक्षर)।",
+    "startDate": "प्रारंभ तिथि",
+    "endDate": "समाप्ति तिथि",
+    "setAsCurrent": "वर्तमान वर्ष के रूप में सेट करें",
+    "save": "शैक्षणिक वर्ष सहेजें",
+    "setCurrent": "वर्तमान सेट करें",
+    "loadFailed": "शैक्षणिक वर्ष लोड करने में विफल।",
+    "createFailed": "शैक्षणिक वर्ष बनाने में विफल।",
+    "setCurrentFailed": "वर्तमान वर्ष सेट करने में विफल।",
+    "searchPlaceholder": "नाम या स्थिति से खोजें…"
+  },
+  "table": {
+    "search": "खोज",
+    "clear": "साफ़ करें",
+    "empty": "कोई रिकॉर्ड नहीं मिला।",
+    "loading": "लोड हो रहा है…",
+    "showing": "{{total}} में से {{from}}–{{to}} दिखा रहे हैं",
+    "rows": "पंक्तियाँ",
+    "name": "नाम",
+    "period": "अवधि",
+    "status": "स्थिति",
+    "current": "वर्तमान",
+    "actions": "कार्रवाई",
+    "all": "सभी",
+    "allStatuses": "सभी स्थितियाँ",
+    "currentOnly": "केवल वर्तमान",
+    "notCurrent": "वर्तमान नहीं",
+    "statusActive": "सक्रिय",
+    "statusUpcoming": "आगामी",
+    "statusClosed": "बंद",
+    "currentBadge": "वर्तमान"
+  },
+  "common": {
+    "comingSoon": "जल्द आ रहा है",
+    "language": "भाषा",
+    "cancel": "रद्द करें",
+    "close": "बंद करें"
+  },
+  "status": {
+    "Active": "सक्रिय",
+    "Upcoming": "आगामी",
+    "Closed": "बंद"
+  },
+  "errors": {
+    "unknown": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+    "validation": {
+      "failed": "कृपया फ़ॉर्म जाँचें और पुनः प्रयास करें।"
+    },
+    "institution": {
+      "tenant_required": "टेनेंट संदर्भ आवश्यक है।",
+      "academic_year": {
+        "name_required": "शैक्षणिक वर्ष का नाम आवश्यक है।",
+        "name_too_long": "शैक्षणिक वर्ष का नाम {{max}} अक्षरों से अधिक नहीं हो सकता।",
+        "start_date_required": "प्रारंभ तिथि आवश्यक है।",
+        "end_date_required": "समाप्ति तिथि आवश्यक है।",
+        "end_date_before_start": "समाप्ति तिथि प्रारंभ तिथि के बाद होनी चाहिए।",
+        "name_exists": "इस नाम का शैक्षणिक वर्ष पहले से मौजूद है।",
+        "dates_overlap": "ये तिथियाँ किसी मौजूदा शैक्षणिक वर्ष से ओवरलैप करती हैं।"
+      }
+    }
+  }
+}

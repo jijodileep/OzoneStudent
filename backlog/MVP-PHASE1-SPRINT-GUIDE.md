@@ -12,7 +12,7 @@ Backlog tasks describe **target** scope. The repo today:
 | Tenancy | `PlatformDbContext` + per-tenant `ApplicationDbContext` (`ss_t_{slug}`) |
 | Sprint 1 | MediatR pipeline, tenant filter/interceptor, outbox, Docker, CI — **done** |
 | Sprint 2 | Auth, RBAC, audit APIs — **done**; Angular auth UI — **not started** |
-| Sprint 3 (in progress) | Tenant + academic structure APIs — **done**; subjects + Angular admin shell — **not started** |
+| Sprint 3 (in progress) | Tenant + academic structure APIs — **done**; Angular admin shell — **started** (login, shell, academic years); subjects — **deferred** |
 | Super admin | Not seeded; use demo `tenant_admin` + `institution.tenant.create` for tenant creation |
 
 Sprint 3 L5 breakdown: [`sprint-3-l5-subtasks.md`](sprint-3-l5-subtasks.md)

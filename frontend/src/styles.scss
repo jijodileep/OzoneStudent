@@ -1,0 +1,53 @@
+body {
+  background: #f4f6f9;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.page-header h1,
+.page-header .h3 {
+  font-weight: 600;
+}
+
+.card {
+  border-radius: 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+html[dir='rtl'] body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+html[dir='rtl'] .sidebar-link {
+  border-left: 0;
+  border-right: 3px solid transparent;
+}
+
+html[dir='rtl'] .sidebar-link.active {
+  border-right-color: #0d6efd;
+}
+
+html[dir='rtl'] .sort-btn .bi {
+  margin-left: 0 !important;
+  margin-right: 0.25rem;
+}
+
+html[dir='rtl'] .input-group > :not(:first-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+html[dir='rtl'] .flatpickr-calendar {
+  direction: rtl;
+}
+
+.flatpickr-calendar {
+  z-index: 1200;
+}
+
+.app-modal-root .flatpickr-calendar {
+  z-index: 1200;
+}

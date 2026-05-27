@@ -1,0 +1,36 @@
+@if (open()) {
+  <div class="app-modal-root" role="presentation">
+    <div class="modal-backdrop fade show app-modal-backdrop"></div>
+
+    <div
+      class="modal fade show d-block app-modal"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="titleKey() ? 'appModalTitle' : null"
+      (click)="onBackdropClick($event)">
+      <div
+        class="modal-dialog"
+        [class.modal-sm]="size() === 'sm'"
+        [class.modal-lg]="size() === 'lg'"
+        role="document">
+        <div class="modal-content">
+          @if (titleKey()) {
+            <div class="modal-header">
+              <h5 class="modal-title" id="appModalTitle">{{ titleKey() | translate }}</h5>
+              <button
+                type="button"
+                class="btn-close"
+                [attr.aria-label]="'common.close' | translate"
+                (click)="dismissed.emit()"></button>
+            </div>
+          }
+
+          <ng-content select="[modal-body]" />
+
+          <ng-content select="[modal-footer]" />
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,92 @@
+<app-modal
+  [open]="modal.isOpen()"
+  titleKey="academicYears.createTitle"
+  (dismissed)="dismiss()">
+  <div modal-body class="modal-body">
+    @if (errorKeys().length > 0) {
+      <div class="alert alert-danger">
+        @for (key of errorKeys(); track key) {
+          <div>{{ key | translate }}</div>
+        }
+      </div>
+    }
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      id="createAcademicYearForm"
+      class="row g-3"
+      novalidate>
+      <div class="col-12">
+        <label class="form-label" for="modalYearName">{{ 'academicYears.name' | translate }}</label>
+        <input
+          id="modalYearName"
+          class="form-control"
+          formControlName="name"
+          [attr.maxlength]="nameMaxLength"
+          [placeholder]="'academicYears.namePlaceholder' | translate"
+          [class.is-invalid]="!!nameErrorKey()" />
+        @if (nameErrorKey(); as key) {
+          <div class="invalid-feedback d-block">
+            @if (form.controls.name.errors?.['maxlength']) {
+              {{ key | translate:{ max: nameMaxLength } }}
+            } @else {
+              {{ key | translate }}
+            }
+          </div>
+        } @else {
+          <div class="form-text">{{ 'academicYears.nameHint' | translate:{ max: nameMaxLength } }}</div>
+        }
+      </div>
+
+      <div class="col-12 col-sm-6">
+        <label class="form-label" for="modalYearStartDate">{{ 'academicYears.startDate' | translate }}</label>
+        <app-date-picker
+          inputId="modalYearStartDate"
+          formControlName="startDate"
+          [invalid]="!!dateErrorKey('startDate')"
+          [maxDate]="form.controls.endDate.value || null" />
+        @if (dateErrorKey('startDate'); as key) {
+          <div class="invalid-feedback d-block">{{ key | translate }}</div>
+        }
+      </div>
+
+      <div class="col-12 col-sm-6">
+        <label class="form-label" for="modalYearEndDate">{{ 'academicYears.endDate' | translate }}</label>
+        <app-date-picker
+          inputId="modalYearEndDate"
+          formControlName="endDate"
+          [invalid]="!!dateErrorKey('endDate')"
+          [minDate]="form.controls.startDate.value || null" />
+        @if (dateErrorKey('endDate'); as key) {
+          <div class="invalid-feedback d-block">{{ key | translate }}</div>
+        }
+      </div>
+
+      <div class="col-12">
+        <div class="form-check">
+          <input
+            id="modalSetCurrent"
+            class="form-check-input"
+            type="checkbox"
+            formControlName="setAsCurrent" />
+          <label class="form-check-label" for="modalSetCurrent">
+            {{ 'academicYears.setAsCurrent' | translate }}
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div modal-footer class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" [disabled]="saving()" (click)="dismiss()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button type="submit" class="btn btn-primary" form="createAcademicYearForm" [disabled]="saving()">
+      @if (saving()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+      }
+      {{ 'academicYears.save' | translate }}
+    </button>
+  </div>
+</app-modal>

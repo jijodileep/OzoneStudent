@@ -1,0 +1,42 @@
+.admin-shell {
+  background: #f4f6f9;
+}
+
+.sidebar {
+  width: 260px;
+  transition: width 0.2s ease, margin 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sidebar.collapsed {
+  width: 0;
+  overflow: hidden;
+  border: 0 !important;
+}
+
+.sidebar-brand {
+  white-space: nowrap;
+}
+
+.shell-content {
+  min-width: 0;
+}
+
+.language-select {
+  width: 8rem;
+}
+
+@media (max-width: 991.98px) {
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1040;
+    height: 100vh;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar.collapsed {
+    margin-left: -260px;
+    width: 260px;
+  }
+}

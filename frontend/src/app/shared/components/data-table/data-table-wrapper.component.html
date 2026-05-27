@@ -1,0 +1,149 @@
+<div class="data-table card border-0 shadow-sm">
+  <div class="data-table-toolbar">
+    <div class="row g-3 align-items-end">
+      @if (showSearch()) {
+        <div class="col-12 col-md-6 col-xl-4">
+          <label class="form-label small text-muted mb-1">{{ 'table.search' | translate }}</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+            <input
+              type="search"
+              class="form-control"
+              [placeholder]="searchPlaceholder() | translate"
+              [ngModel]="query().search"
+              (ngModelChange)="onSearchInput($event)" />
+          </div>
+        </div>
+      }
+
+      @for (column of columns; track column.id) {
+        @if (column.filter) {
+          <div class="col-6 col-md-4 col-xl-2">
+            <label class="form-label small text-muted mb-1">{{ column.header | translate }}</label>
+            @if (column.filter.type === 'select') {
+              <select
+                class="form-select form-select-sm"
+                [ngModel]="filterValue(column.id)"
+                (ngModelChange)="onFilterChange(column.id, $event)">
+                <option value="">{{ (column.filter.placeholder ?? 'table.all') | translate }}</option>
+                @for (option of column.filter.options ?? []; track option.value) {
+                  <option [value]="option.value">{{ option.label | translate }}</option>
+                }
+              </select>
+            } @else {
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [placeholder]="(column.filter.placeholder ?? 'table.search') | translate"
+                [ngModel]="filterValue(column.id)"
+                (ngModelChange)="onFilterChange(column.id, $event)" />
+            }
+          </div>
+        }
+      }
+
+      <div class="col-auto ms-xl-auto pb-1">
+        @if (hasActiveFilters()) {
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-1"></i>{{ 'table.clear' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive data-table-body">
+    <table class="table table-hover align-middle mb-0 data-table-grid">
+      <thead>
+        <tr>
+          @for (column of columns; track column.id) {
+            <th [class]="column.headerClass ?? ''" scope="col">
+              @if (column.sortable !== false) {
+                <button
+                  type="button"
+                  class="btn btn-link btn-sm text-decoration-none p-0 sort-btn"
+                  (click)="sort(column.id)">
+                  {{ column.header | translate }}
+                  <i class="bi ms-1" [class]="sortIcon(column.id)"></i>
+                </button>
+              } @else {
+                {{ column.header | translate }}
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr>
+            <td [attr.colspan]="columns.length" class="text-center py-5">
+              <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+              <span class="text-muted">{{ 'table.loading' | translate }}</span>
+            </td>
+          </tr>
+        } @else if (displayedRows().length === 0) {
+          <tr>
+            <td [attr.colspan]="columns.length" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+              {{ emptyMessage() | translate }}
+            </td>
+          </tr>
+        } @else {
+          @for (row of displayedRows(); track trackRow(row, $index)) {
+            <tr>
+              @for (column of columns; track column.id) {
+                <td [class]="column.cellClass ?? ''">
+                  @if (templateForColumn(column.id); as cellTemplate) {
+                    <ng-container
+                      [ngTemplateOutlet]="cellTemplate.template"
+                      [ngTemplateOutletContext]="{ row: row }" />
+                  } @else {
+                    {{ column.displayValue(row) }}
+                  }
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="data-table-footer d-flex flex-wrap gap-3 justify-content-between align-items-center">
+    <div class="small text-muted">
+      {{ 'table.showing' | translate:{ from: rangeStart(), to: rangeEnd(), total: totalRecords() } }}
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <label class="small text-muted mb-0">{{ 'table.rows' | translate }}</label>
+      <select
+        class="form-select form-select-sm page-size-select"
+        [ngModel]="pageSize()"
+        (ngModelChange)="onPageSizeChange($event)">
+        @for (size of pageSizeOptions(); track size) {
+          <option [value]="size">{{ size }}</option>
+        }
+      </select>
+
+      <nav aria-label="Table pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="currentPage() <= 1">
+            <button type="button" class="page-link" (click)="goToPage(currentPage() - 1)" aria-label="Previous">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          @for (page of pageNumbers(); track page) {
+            <li class="page-item" [class.active]="page === currentPage()">
+              <button type="button" class="page-link" (click)="goToPage(page)">{{ page }}</button>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="currentPage() >= totalPages()">
+            <button type="button" class="page-link" (click)="goToPage(currentPage() + 1)" aria-label="Next">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

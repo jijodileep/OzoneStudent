@@ -1,0 +1,40 @@
+<div class="login-page min-vh-100 d-flex align-items-center justify-content-center p-3">
+  <div class="card shadow login-card border-0">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="login-icon mx-auto mb-3">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <h1 class="h4 mb-0">{{ 'app.brand' | translate }}</h1>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label class="form-label" for="tenantSlug">{{ 'auth.tenantSlug' | translate }}</label>
+          <input id="tenantSlug" type="text" class="form-control" formControlName="tenantSlug" autocomplete="organization" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">{{ 'auth.email' | translate }}</label>
+          <input id="email" type="email" class="form-control" formControlName="email" autocomplete="username" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="password">{{ 'auth.password' | translate }}</label>
+          <input id="password" type="password" class="form-control" formControlName="password" autocomplete="current-password" />
+        </div>
+
+        @if (errorMessage(); as messageKey) {
+          <div class="alert alert-danger py-2">{{ messageKey | translate }}</div>
+        }
+
+        <button class="btn btn-primary w-100" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+          }
+          {{ 'auth.signIn' | translate }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

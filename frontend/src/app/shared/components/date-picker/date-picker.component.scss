@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.app-date-picker {
+  position: relative;
+}
+
+.app-date-picker-input {
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.app-date-picker-input:disabled {
+  cursor: not-allowed;
+  background-color: var(--bs-secondary-bg);
+}
+
+.app-date-picker-toggle {
+  flex-shrink: 0;
+}
+
+.app-date-picker-inline .flatpickr-calendar {
+  position: static !important;
+  box-shadow: none;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.app-date-picker-inline .flatpickr-calendar.open {
+  display: block;
+}

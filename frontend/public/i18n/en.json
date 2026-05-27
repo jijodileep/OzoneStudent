@@ -1,0 +1,104 @@
+{
+  "app": {
+    "title": "School SaaS",
+    "brand": "School SaaS Admin"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "academicYears": "Academic Years",
+    "grades": "Grades & Classes",
+    "staff": "Staff",
+    "customFields": "Custom Fields",
+    "roles": "Roles",
+    "auditLogs": "Audit Logs",
+    "groups": {
+      "main": "Main",
+      "institution": "Institution",
+      "settings": "Settings"
+    },
+    "searchPlaceholder": "Search menu...",
+    "clearSearch": "Clear search",
+    "noResults": "No menu items found"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "tenantSlug": "Tenant slug",
+    "email": "Email",
+    "password": "Password",
+    "logout": "Logout",
+    "loginFailed": "Login failed. Check credentials and try again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {{name}}",
+    "roles": "Roles",
+    "noRoles": "No roles assigned"
+  },
+  "academicYears": {
+    "title": "Academic Years",
+    "new": "New academic year",
+    "createTitle": "Create academic year",
+    "name": "Name",
+    "namePlaceholder": "e.g. 2026-27",
+    "nameHint": "Short label for the year (max {{max}} characters).",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "setAsCurrent": "Set as current academic year",
+    "save": "Save academic year",
+    "setCurrent": "Set current",
+    "loadFailed": "Failed to load academic years.",
+    "createFailed": "Could not create academic year.",
+    "setCurrentFailed": "Could not set current academic year.",
+    "searchPlaceholder": "Search by name or status…"
+  },
+  "table": {
+    "search": "Search",
+    "clear": "Clear",
+    "empty": "No records found.",
+    "loading": "Loading…",
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "rows": "Rows",
+    "name": "Name",
+    "period": "Period",
+    "status": "Status",
+    "current": "Current",
+    "actions": "Actions",
+    "all": "All",
+    "allStatuses": "All statuses",
+    "currentOnly": "Current only",
+    "notCurrent": "Not current",
+    "statusActive": "Active",
+    "statusUpcoming": "Upcoming",
+    "statusClosed": "Closed",
+    "currentBadge": "Current"
+  },
+  "common": {
+    "comingSoon": "Coming soon",
+    "language": "Language",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "status": {
+    "Active": "Active",
+    "Upcoming": "Upcoming",
+    "Closed": "Closed"
+  },
+  "errors": {
+    "unknown": "Something went wrong. Please try again.",
+    "validation": {
+      "failed": "Please check the form and try again."
+    },
+    "institution": {
+      "tenant_required": "Tenant context is required.",
+      "academic_year": {
+        "name_required": "Academic year name is required.",
+        "name_too_long": "Academic year name must be {{max}} characters or fewer.",
+        "start_date_required": "Start date is required.",
+        "end_date_required": "End date is required.",
+        "end_date_before_start": "End date must be after start date.",
+        "name_exists": "An academic year with this name already exists.",
+        "dates_overlap": "These dates overlap an existing academic year."
+      }
+    }
+  }
+}
