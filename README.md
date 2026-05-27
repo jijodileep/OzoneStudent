@@ -12,6 +12,11 @@ Multi-tenant student management platform — ASP.NET Core 9 layered monolith, An
 | Users | `POST /api/v1/users/invite` |
 | Audit | `GET /api/v1/audit-logs` |
 | Tenant provisioning | `POST /api/v1/tenants` (requires `institution.tenant.create`) |
+| Academic years | `GET/POST /api/v1/academic-years`, `POST …/{id}/set-current` (`institution.academic-years.manage`) |
+| Grades / classes | `GET/POST /api/v1/grades`, `GET/POST /api/v1/classes`, `POST …/sections` (`institution.classes.manage`) |
+| Staff | `GET/POST/PUT /api/v1/staff`, `POST …/{id}/link-user`, custom fields on create/update (`institution.staff.manage`) |
+| Custom fields | `GET/POST/PUT /api/v1/custom-fields?entityType=Staff|Student` (`institution.staff.fields.manage`) |
+| Documents | `GET/POST/DELETE /api/v1/staff/{id}/documents` (`institution.staff.documents.manage`); student routes ready for Sprint 4 (`students.documents.manage`) |
 | Health | `GET /health`, `GET /health/ready`, `GET /api/v1/ping` |
 | Super-admin user | **Not seeded** — `super_admin` JWT role bypasses RBAC when present |
 | Password reset / invite / audit list | **Implemented** (emails logged via `LogEmailSender` in dev) |
@@ -20,7 +25,14 @@ Multi-tenant student management platform — ASP.NET Core 9 layered monolith, An
 
 ```text
 src/
-  SchoolSaaS.Api/Endpoints/          # Minimal API — Auth, Users, Tenants, Audit, Platform
+  SchoolSaaS.Api/Endpoints/          # one subfolder per module
+    Auth/                            AuthEndpoints.cs       (Identity)
+    Users/                           UserEndpoints.cs         (Identity)
+    Tenants/                         TenantEndpoints.cs       (Institution)
+    Institution/                     AcademicYearEndpoints.cs (Institution)
+    Audit/                           AuditEndpoints.cs        (Audit)
+    Platform/                        PlatformEndpoints.cs     (Platform)
+    Rbac/                            RoleEndpoints.cs         (RBAC)
   SchoolSaaS.Application/
     Commands/{Area}/{Endpoint}/      # Command + Handler + Validator per endpoint
     Queries/{Area}/{Endpoint}/       # Query + Handler (+ Validator)

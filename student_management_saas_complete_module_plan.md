@@ -1168,7 +1168,13 @@ Level 5: Subtask         → e.g. Create StudentGuardianEntity
 school/
 ├── src/
 │   ├── SchoolSaaS.Api/
-│   │   └── Endpoints/               Auth, Users, Tenants, Audit, Platform
+│   │   └── Endpoints/               # module-wise — namespace SchoolSaaS.Api.Endpoints.{Module}
+│   │       ├── Auth/                AuthEndpoints.cs        (Identity)
+│   │       ├── Users/               UserEndpoints.cs        (Identity)
+│   │       ├── Tenants/             TenantEndpoints.cs      (Institution)
+│   │       ├── Audit/               AuditEndpoints.cs       (Audit)
+│   │       ├── Platform/            PlatformEndpoints.cs    (Platform)
+│   │       └── Rbac/                RoleEndpoints.cs        (RBAC)
 │   ├── SchoolSaaS.Application/
 │   │   ├── Commands/
 │   │   │   ├── Auth/                Login, Logout, Register, ForgotPassword, …

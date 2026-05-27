@@ -56,6 +56,20 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Term> Terms => Set<Term>();
 
+    public DbSet<Grade> Grades => Set<Grade>();
+
+    public DbSet<SchoolClass> Classes => Set<SchoolClass>();
+
+    public DbSet<Section> Sections => Set<Section>();
+
+    public DbSet<Staff> StaffMembers => Set<Staff>();
+
+    public DbSet<CustomFieldDefinition> CustomFieldDefinitions => Set<CustomFieldDefinition>();
+
+    public DbSet<CustomFieldValue> CustomFieldValues => Set<CustomFieldValue>();
+
+    public DbSet<ProfileDocument> ProfileDocuments => Set<ProfileDocument>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(

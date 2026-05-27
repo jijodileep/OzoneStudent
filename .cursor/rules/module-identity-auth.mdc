@@ -1,6 +1,6 @@
 ---
 description: Identity & Authentication module — users, JWT, login, invitations
-globs: src/SchoolSaaS.Application/Commands/Auth/**,src/SchoolSaaS.Application/Commands/Users/**,src/SchoolSaaS.Application/Queries/Auth/**,src/SchoolSaaS.Domain/Identity/**,src/SchoolSaaS.Api/Endpoints/AuthEndpoints.cs,src/SchoolSaaS.Api/Endpoints/UserEndpoints.cs
+globs: src/SchoolSaaS.Application/Commands/Auth/**,src/SchoolSaaS.Application/Commands/Users/**,src/SchoolSaaS.Application/Queries/Auth/**,src/SchoolSaaS.Domain/Identity/**,src/SchoolSaaS.Api/Endpoints/Auth/**,src/SchoolSaaS.Api/Endpoints/Users/**
 alwaysApply: false
 ---
 

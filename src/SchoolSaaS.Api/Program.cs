@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SchoolSaaS.Api.Api.V1;
 using SchoolSaaS.Api.Health;
 using SchoolSaaS.Api.DependencyInjection;
@@ -31,6 +32,11 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApiVersioningServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 var app = builder.Build();
 

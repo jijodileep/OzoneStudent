@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using SchoolSaaS.Application.Abstractions.Audit;
@@ -11,7 +12,8 @@ public sealed class EntityChangeCaptureInterceptor(IEntityChangeCapture changeCa
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = false
+        WriteIndented = false,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles
     };
 
     public override InterceptionResult<int> SavingChanges(
@@ -91,7 +93,11 @@ public sealed class EntityChangeCaptureInterceptor(IEntityChangeCapture changeCa
         {
             Domain.Identity.User => AuditCategories.Auth,
             Domain.Rbac.Role or Domain.Rbac.RolePermission or Domain.Rbac.UserRole => AuditCategories.Rbac,
-            Domain.Institution.AcademicYear or Domain.Institution.Term => AuditCategories.Institution,
+            Domain.Institution.AcademicYear or Domain.Institution.Term
+                or Domain.Institution.Grade or Domain.Institution.SchoolClass
+                or Domain.Institution.Section or Domain.Institution.Staff
+                or Domain.Institution.CustomFieldDefinition or Domain.Institution.CustomFieldValue
+                or Domain.Institution.ProfileDocument => AuditCategories.Institution,
             _ => AuditCategories.Platform
         };
 }

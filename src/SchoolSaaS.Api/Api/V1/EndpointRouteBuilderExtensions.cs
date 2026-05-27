@@ -1,6 +1,12 @@
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using SchoolSaaS.Api.Endpoints;
+using SchoolSaaS.Api.Endpoints.Audit;
+using SchoolSaaS.Api.Endpoints.Auth;
+using SchoolSaaS.Api.Endpoints.Institution;
+using SchoolSaaS.Api.Endpoints.Platform;
+using SchoolSaaS.Api.Endpoints.Rbac;
+using SchoolSaaS.Api.Endpoints.Tenants;
+using SchoolSaaS.Api.Endpoints.Users;
 
 namespace SchoolSaaS.Api.Api.V1;
 
@@ -21,6 +27,13 @@ public static class EndpointRouteBuilderExtensions
         versionedApi.MapUserEndpoints();
         versionedApi.MapAuditEndpoints();
         versionedApi.MapTenantEndpoints();
+        versionedApi.MapAcademicYearEndpoints();
+        versionedApi.MapGradeEndpoints();
+        versionedApi.MapClassEndpoints();
+        versionedApi.MapStaffEndpoints();
+        versionedApi.MapStaffDocumentEndpoints();
+        versionedApi.MapStudentDocumentEndpoints();
+        versionedApi.MapCustomFieldEndpoints();
         versionedApi.MapRoleEndpoints();
     }
 }

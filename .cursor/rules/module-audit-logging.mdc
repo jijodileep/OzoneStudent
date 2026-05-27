@@ -1,6 +1,6 @@
 ---
 description: Audit Logging module — universal append-only audit trail
-globs: src/SchoolSaaS.Application/Queries/Audit/**,src/SchoolSaaS.Domain/Audit/**,src/SchoolSaaS.Api/Endpoints/AuditEndpoints.cs,src/SchoolSaaS.Application/Behaviors/**
+globs: src/SchoolSaaS.Application/Queries/Audit/**,src/SchoolSaaS.Domain/Audit/**,src/SchoolSaaS.Api/Endpoints/Audit/**,src/SchoolSaaS.Application/Behaviors/**
 alwaysApply: false
 ---
 

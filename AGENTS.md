@@ -11,8 +11,9 @@ Multi-tenant Student Management SaaS. Modular monolith, ASP.NET Core 9, Angular 
 1. Check backlog task in [`backlog/mvp-phase1-linear-import.csv`](backlog/mvp-phase1-linear-import.csv)
 2. Sprint plan (all sprints): [`backlog/mvp-phase1-all-sprints.md`](backlog/mvp-phase1-all-sprints.md)
 3. For Sprint 1 tasks, expand L5 subtasks in [`backlog/sprint-1-l5-subtasks.md`](backlog/sprint-1-l5-subtasks.md)
-4. Cursor rules in [`.cursor/rules/`](.cursor/rules/) auto-apply by file glob — follow them strictly
-5. Read [`backlog/MVP-PHASE1-SPRINT-GUIDE.md`](backlog/MVP-PHASE1-SPRINT-GUIDE.md) for sprint context and DoD
+4. For **Sprint 3** (current), use [`backlog/sprint-3-l5-subtasks.md`](backlog/sprint-3-l5-subtasks.md)
+5. Cursor rules in [`.cursor/rules/`](.cursor/rules/) auto-apply by file glob — follow them strictly
+6. Read [`backlog/MVP-PHASE1-SPRINT-GUIDE.md`](backlog/MVP-PHASE1-SPRINT-GUIDE.md) for sprint context and DoD
 
 ## Architecture Summary
 
@@ -46,10 +47,13 @@ SchoolSaaS.Application/
     Auth/AcceptInvitation/
     Users/InviteUser/
     Tenants/CreateTenant/
+    Institution/CreateAcademicYear/
+    Institution/SetCurrentAcademicYear/
   Queries/
     Auth/GetCurrentUser/
     Audit/ListAuditLogs/
     Platform/Ping/
+    Institution/ListAcademicYears/
   Abstractions/              Ports (IUserRepository, IAuditService, …)
   Behaviors/                 Validation, Authorization, Audit, Tenant, Logging
   Common/                    ICommand<T>, IQuery<T>, IPlatformCommand
@@ -66,6 +70,33 @@ SchoolSaaS.Application/
 **Namespace examples:** `SchoolSaaS.Application.Commands.Auth.Login`, `SchoolSaaS.Application.Queries.Audit.ListAuditLogs`.
 
 Do **not** use legacy paths `Identity/Commands`, `Platform/Commands`, or flat `Application/Auth/`.
+
+### Endpoint folder layout (Api layer — module-wise)
+
+One folder per **module / route area**. Namespace = folder path (`SchoolSaaS.Api.Endpoints.{Module}`). Never place endpoint files directly under `Endpoints/`.
+
+```text
+SchoolSaaS.Api/Endpoints/
+  Auth/AuthEndpoints.cs           # Identity
+  Users/UserEndpoints.cs          # Identity
+  Tenants/TenantEndpoints.cs      # Institution
+  Audit/AuditEndpoints.cs         # Audit
+  Platform/PlatformEndpoints.cs   # Platform
+  Rbac/RoleEndpoints.cs           # RBAC
+  Institution/AcademicYearEndpoints.cs  # Institution (academic years)
+```
+
+| Module | API route group | Endpoint file | Commands / queries path |
+|--------|-----------------|---------------|-------------------------|
+| Identity | `/api/v1/auth/*` | `Endpoints/Auth/AuthEndpoints.cs` | `Commands/Auth/{Operation}/` or `Queries/Auth/GetCurrentUser/` |
+| Identity | `/api/v1/users/*` | `Endpoints/Users/UserEndpoints.cs` | `Commands/Users/InviteUser/` |
+| Institution | `/api/v1/tenants` | `Endpoints/Tenants/TenantEndpoints.cs` | `Commands/Tenants/CreateTenant/` |
+| Institution | `/api/v1/academic-years` | `Endpoints/Institution/AcademicYearEndpoints.cs` | `Commands/Institution/*`, `Queries/Institution/ListAcademicYears/` |
+| Audit | `/api/v1/audit-logs` | `Endpoints/Audit/AuditEndpoints.cs` | `Queries/Audit/ListAuditLogs/` |
+| Platform | `/api/v1/ping` | `Endpoints/Platform/PlatformEndpoints.cs` | `Queries/Platform/Ping/` |
+| RBAC | `/api/v1/roles/*` | `Endpoints/Rbac/RoleEndpoints.cs` | `Commands/Rbac/*`, `Queries/Rbac/*` |
+
+Register route groups in `Api/V1/EndpointRouteBuilderExtensions.cs`.
 
 ### Databases (MySQL)
 
@@ -92,10 +123,23 @@ Never accept `TenantId` from the client body — resolve via JWT / `X-Tenant-Slu
 | POST | `/api/v1/users/invite` | `users.invite` |
 | GET | `/api/v1/audit-logs` | `audit.logs.read` (paged) |
 | POST | `/api/v1/tenants` | `institution.tenant.create` |
+| GET | `/api/v1/academic-years` | `institution.academic-years.manage` |
+| POST | `/api/v1/academic-years` | `institution.academic-years.manage` |
+| POST | `/api/v1/academic-years/{id}/set-current` | `institution.academic-years.manage` |
+| GET/POST | `/api/v1/grades` | `institution.classes.manage` |
+| GET/POST | `/api/v1/classes` | `institution.classes.manage` |
+| POST | `/api/v1/classes/{id}/sections` | `institution.classes.manage` |
+| GET/POST | `/api/v1/staff` | `institution.staff.manage` |
+| GET/PUT | `/api/v1/staff/{id}` | `institution.staff.manage` — includes custom field values |
+| POST | `/api/v1/staff/{id}/link-user` | `institution.staff.manage` |
+| GET/POST/PUT | `/api/v1/custom-fields` | `institution.staff.fields.manage` — per-tenant dynamic fields (Staff/Student) |
+| GET/POST/DELETE | `/api/v1/staff/{id}/documents` | `institution.staff.documents.manage` |
+| GET/POST/DELETE | `/api/v1/students/{id}/documents` | `students.documents.manage` (student owner validation in Sprint 4) |
+| GET/POST/PUT | `/api/v1/roles/*` | RBAC — list/create roles, assign permissions, user permissions |
 | GET | `/api/v1/ping` | Authenticated smoke test |
 | GET | `/health`, `/health/ready` | No auth |
 
-**Not implemented yet:** super-admin seed, suspend tenant, real email delivery (uses `LogEmailSender`).
+**Not implemented yet:** super-admin seed, suspend tenant, subjects, Angular admin shell, real email delivery (uses `LogEmailSender`).
 
 ## Non-Negotiables
 
@@ -147,4 +191,4 @@ When implementing a backlog task, deliver:
 
 ## Current Phase
 
-**MVP Phase 1** — See sprint guide for scope. Phase 2 adds Finance/LMS/Student App/Social.
+**MVP Phase 1 — Sprint 3** (Institution + Admin shell). See [`backlog/sprint-3-l5-subtasks.md`](backlog/sprint-3-l5-subtasks.md). Phase 2 adds Finance/LMS/Student App/Social.

@@ -10,6 +10,12 @@ public static class PermissionCodes
 
     public const string InstitutionTenantCreate = "institution.tenant.create";
     public const string InstitutionAcademicYearsManage = "institution.academic-years.manage";
+    public const string InstitutionClassesManage = "institution.classes.manage";
+    public const string InstitutionSubjectsManage = "institution.subjects.manage";
+    public const string InstitutionStaffManage = "institution.staff.manage";
+    public const string InstitutionStaffFieldsManage = "institution.staff.fields.manage";
+    public const string InstitutionStaffDocumentsManage = "institution.staff.documents.manage";
+    public const string StudentsDocumentsManage = "students.documents.manage";
 
     public const string RolesRoleRead = "roles.role.read";
     public const string RolesRoleCreate = "roles.role.create";

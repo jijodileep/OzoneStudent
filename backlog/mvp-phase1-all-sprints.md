@@ -2,11 +2,16 @@
 
 ## Implementation alignment (May 2026)
 
+**Current sprint:** Sprint 3 — Institution + Admin shell
+
 - **Database:** MySQL 8 — `schoolsaas_platform` + `ss_t_{slug}` per tenant (see [`README.md`](../README.md)).
 - **Code:** `src/SchoolSaaS.{Api,Application,Domain,Infrastructure,Shared}/` (not `src/Modules/*` yet).
-- **CQRS paths:** `Application/Commands/{Area}/{Endpoint}/`, `Application/Queries/{Area}/{Endpoint}/` (e.g. `Commands/Auth/Login/`, `Queries/Audit/ListAuditLogs/`).
-- **Done early:** tenant isolation, full Sprint 2 auth/audit APIs, `POST /api/v1/tenants`, permission catalog seeding.
-- **Not done:** super-admin seed, suspend tenant, academic/student/fees domains, Angular/mobile wiring.
+- **CQRS paths:** `Application/Commands/{Area}/{Endpoint}/`, `Application/Queries/{Area}/{Endpoint}/` (e.g. `Commands/Institution/CreateAcademicYear/`).
+- **Done:** Sprints 1–2 backend; full institution structure APIs (tenant, academic years, grades, classes, sections, staff).
+- **In progress (Sprint 3):** subjects, Angular admin shell.
+- **Not done:** super-admin seed, suspend tenant, student/fees domains, Angular/mobile wiring.
+
+Sprint 3 L5 breakdown: [`sprint-3-l5-subtasks.md`](sprint-3-l5-subtasks.md)
 
 Task tables below remain the **backlog**; verify the repo before assuming a row is still Todo.
 
@@ -26,6 +31,7 @@ Task tables below remain the **backlog**; verify the repo before assuming a row 
 | [`mvp-phase1-linear-import.csv`](mvp-phase1-linear-import.csv) | L4 task backlog (Linear/Jira import) |
 | [`MVP-PHASE1-SPRINT-GUIDE.md`](MVP-PHASE1-SPRINT-GUIDE.md) | Import instructions, DoD, Cursor prompt template |
 | [`sprint-1-l5-subtasks.md`](sprint-1-l5-subtasks.md) | **Sprint 1 only** — full L5 subtask expansion (~142 subtasks) |
+| [`sprint-3-l5-subtasks.md`](sprint-3-l5-subtasks.md) | **Sprint 3** — institution + admin shell L5 subtasks |
 | [`sprint-1-l5-linear-import.csv`](sprint-1-l5-linear-import.csv) | Sprint 1 L5 subtasks for Linear |
 | [`../student_management_saas_complete_module_plan.md`](../student_management_saas_complete_module_plan.md) | Master module plan and phase roadmap |
 | [`../.cursor/rules/`](../.cursor/rules/) | Architecture rules (auto-apply during implementation) |
@@ -74,7 +80,8 @@ Level 5: Subtask         → e.g. Create StudentGuardianEntity  (sprint-1-l5-sub
 | Sprint | L5 Doc | Status |
 |---|---|---|
 | Sprint 1 | [`sprint-1-l5-subtasks.md`](sprint-1-l5-subtasks.md) | Complete (~142 subtasks) |
-| Sprints 2–6 | — | Expand per sprint using Sprint 1 format before sprint start |
+| Sprint 3 | [`sprint-3-l5-subtasks.md`](sprint-3-l5-subtasks.md) | In progress |
+| Sprints 2, 4–6 | — | Expand per sprint using Sprint 1 format before sprint start |
 
 ---
 
@@ -346,28 +353,24 @@ RoleListPageComponent → PermissionMatrixComponent
 | CreateTenantEndpoint | Institution Management | 1 | ✅ implemented |
 | GetCurrentTenantEndpoint | Institution Management | 1 |
 | TenantProvisioningIntegrationTest | Institution Management | 3 |
-| CreateAcademicYearEntity | Institution Management | 2 |
-| CreateAcademicYearsTableMigration | Institution Management | 2 |
-| CreateAcademicYearCommand | Institution Management | 2 |
-| SetCurrentAcademicYearCommand | Institution Management | 2 |
-| AcademicYearOverlapValidator | Institution Management | 2 |
-| CreateGradeEntity | Institution Management | 2 |
-| CreateGradesTableMigration | Institution Management | 3 |
-| CreateGradeCommand | Institution Management | 2 |
-| CreateClassCommand | Institution Management | 2 |
-| CreateSectionCommand | Institution Management | 2 |
-| AssignClassTeacherCommand | Institution Management | 2 |
-| CreateSubjectEntity | Institution Management | 2 |
-| CreateSubjectCommand | Institution Management | 2 |
-| AssignSubjectToClassCommand | Institution Management | 2 |
-| CreateStaffEntity | Institution Management | 2 |
-| CreateStaffCommand | Institution Management | 2 |
-| LinkStaffToUserCommand | Institution Management | 2 |
-| ListAcademicYearsEndpoint | Institution Management | 1 |
-| CreateAcademicYearEndpoint | Institution Management | 1 |
-| ListClassesEndpoint | Institution Management | 1 |
-| CreateClassEndpoint | Institution Management | 1 |
-| ListStaffEndpoint | Institution Management | 1 |
+| CreateAcademicYearEntity | Institution Management | 2 | ✅ |
+| CreateAcademicYearsTableMigration | Institution Management | 2 | ✅ |
+| CreateAcademicYearCommand | Institution Management | 2 | ✅ |
+| SetCurrentAcademicYearCommand | Institution Management | 2 | ✅ |
+| AcademicYearOverlapValidator | Institution Management | 2 | ✅ (in handler) |
+| ListAcademicYearsEndpoint | Institution Management | 1 | ✅ |
+| CreateAcademicYearEndpoint | Institution Management | 1 | ✅ |
+| CreateGradeEntity | Institution Management | 2 | ✅ |
+| CreateGradesTableMigration | Institution Management | 3 | ✅ |
+| CreateGradeCommand | Institution Management | 2 | ✅ |
+| CreateClassCommand | Institution Management | 2 | ✅ |
+| CreateSectionCommand | Institution Management | 2 | ✅ |
+| CreateStaffEntity | Institution Management | 2 | ✅ |
+| CreateStaffCommand | Institution Management | 2 | ✅ |
+| LinkStaffToUserCommand | Institution Management | 2 | ✅ |
+| ListClassesEndpoint | Institution Management | 1 | ✅ |
+| CreateClassEndpoint | Institution Management | 1 | ✅ |
+| ListStaffEndpoint | Institution Management | 1 | ✅ |
 | AppShellLayoutComponent | Admin Web App | 5 |
 | SidebarNavigationComponent | Admin Web App | 3 |
 | PermissionGuard | Admin Web App | 2 |

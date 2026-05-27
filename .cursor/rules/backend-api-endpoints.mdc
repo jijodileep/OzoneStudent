@@ -47,15 +47,36 @@ public static class StudentEndpoints
 - **No business logic in endpoints**
 - Import types from `SchoolSaaS.Application.Commands.{Area}.{Endpoint}` or `Queries.{Area}.{Endpoint}` (see `backend-cqrs-patterns.mdc`)
 
-## Endpoint → Application folder map
+## Endpoint folder layout (module-wise)
 
-| API file | Application folders |
-|----------|---------------------|
-| `Endpoints/AuthEndpoints.cs` | `Commands/Auth/*`, `Queries/Auth/GetCurrentUser` |
-| `Endpoints/UserEndpoints.cs` | `Commands/Users/InviteUser` |
-| `Endpoints/TenantEndpoints.cs` | `Commands/Tenants/CreateTenant` |
-| `Endpoints/AuditEndpoints.cs` | `Queries/Audit/ListAuditLogs` |
-| `Endpoints/PlatformEndpoints.cs` | `Queries/Platform/Ping` |
+One folder per **module / route area**. Namespace = folder path (`SchoolSaaS.Api.Endpoints.{Module}`).
+
+Do **not** place endpoint files directly under `Endpoints/` — always use a module subfolder.
+
+```text
+SchoolSaaS.Api/Endpoints/
+  Auth/AuthEndpoints.cs           # Identity module
+  Users/UserEndpoints.cs          # Identity module
+  Tenants/TenantEndpoints.cs      # Institution module
+  Audit/AuditEndpoints.cs         # Audit module
+  Platform/PlatformEndpoints.cs   # Platform module
+  Rbac/RoleEndpoints.cs           # RBAC module
+  Institution/AcademicYearEndpoints.cs  # Institution module
+```
+
+Register new groups in `Api/V1/EndpointRouteBuilderExtensions.cs`.
+
+## Endpoint → module → Application map
+
+| Module | API file | Application folders |
+|--------|----------|---------------------|
+| Identity | `Endpoints/Auth/AuthEndpoints.cs` | `Commands/Auth/*`, `Queries/Auth/GetCurrentUser` |
+| Identity | `Endpoints/Users/UserEndpoints.cs` | `Commands/Users/InviteUser` |
+| Institution | `Endpoints/Tenants/TenantEndpoints.cs` | `Commands/Tenants/CreateTenant` |
+| Institution | `Endpoints/Institution/AcademicYearEndpoints.cs` | `Commands/Institution/*`, `Queries/Institution/ListAcademicYears` |
+| Audit | `Endpoints/Audit/AuditEndpoints.cs` | `Queries/Audit/ListAuditLogs` |
+| Platform | `Endpoints/Platform/PlatformEndpoints.cs` | `Queries/Platform/Ping` |
+| RBAC | `Endpoints/Rbac/RoleEndpoints.cs` | `Commands/Rbac/*`, `Queries/Rbac/*` |
 
 ## Pagination
 

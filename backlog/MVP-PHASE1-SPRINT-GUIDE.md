@@ -2,17 +2,20 @@
 
 ## Implementation alignment (May 2026)
 
+**Current sprint:** Sprint 3 — Institution + Admin shell (weeks 5–6)
+
 Backlog tasks describe **target** scope. The repo today:
 
 | Area | Status |
 |------|--------|
 | Stack | ASP.NET Core 9, EF Core, **MySQL**, Redis, RabbitMQ, Serilog |
 | Tenancy | `PlatformDbContext` + per-tenant `ApplicationDbContext` (`ss_t_{slug}`) |
-| Sprint 1 core | MediatR pipeline, tenant filter/interceptor, outbox, Docker, CI — largely done |
-| Sprint 2 auth | login, refresh, logout, register, me, forgot/reset/change password, invite, accept-invitation, audit list — done |
-| Application layout | `Commands/{Area}/{Endpoint}/`, `Queries/{Area}/{Endpoint}/` (see `AGENTS.md`) |
-| Sprint 3 tenant | `POST /api/v1/tenants`, `CreateTenantCommand`, `ITenantOnboardingService` — done; academic structure — not done |
+| Sprint 1 | MediatR pipeline, tenant filter/interceptor, outbox, Docker, CI — **done** |
+| Sprint 2 | Auth, RBAC, audit APIs — **done**; Angular auth UI — **not started** |
+| Sprint 3 (in progress) | Tenant + academic structure APIs — **done**; subjects + Angular admin shell — **not started** |
 | Super admin | Not seeded; use demo `tenant_admin` + `institution.tenant.create` for tenant creation |
+
+Sprint 3 L5 breakdown: [`sprint-3-l5-subtasks.md`](sprint-3-l5-subtasks.md)
 
 Paths in [`sprint-1-l5-subtasks.md`](sprint-1-l5-subtasks.md) that reference `src/Modules/` or PostgreSQL are **planning targets** — implement under `src/SchoolSaaS.*`, MySQL, and **`Application/Commands|Queries/{Area}/{Endpoint}/`** unless a task explicitly migrates layout.
 
@@ -25,6 +28,7 @@ Paths in [`sprint-1-l5-subtasks.md`](sprint-1-l5-subtasks.md) that reference `sr
 | `mvp-phase1-linear-import.csv` | **Linear** — Import via Settings → Workspace → Import |
 | `mvp-phase1-jira-import.csv` | **Jira** — Import via External System Import (CSV) |
 | `sprint-1-l5-subtasks.md` | **Sprint 1 deep dive** — 167 L5 subtasks with file paths, verification steps |
+| `sprint-3-l5-subtasks.md` | **Sprint 3 deep dive** — institution + admin shell L5 subtasks |
 | `sprint-1-l5-linear-import.csv` | **Linear** — Sprint 1 L5 subtasks as child issues (sample critical tasks) |
 | This guide | Sprint planning, team assignment, Cursor workflow |
 | [`mvp-phase1-all-sprints.md`](mvp-phase1-all-sprints.md) | **All sprints** — master doc with every L4 task, exit criteria, handoffs |

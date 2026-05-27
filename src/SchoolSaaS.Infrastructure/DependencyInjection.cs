@@ -3,7 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SchoolSaaS.Domain.Common;
 using SchoolSaaS.Infrastructure.Caching;
+using SchoolSaaS.Infrastructure.Files;
 using SchoolSaaS.Infrastructure.Identity;
+using SchoolSaaS.Infrastructure.Institution;
 using SchoolSaaS.Infrastructure.Events;
 using SchoolSaaS.Infrastructure.Messaging;
 using SchoolSaaS.Application.Abstractions.Platform;
@@ -27,6 +29,8 @@ public static class DependencyInjection
 
         services.AddRedisCaching(configuration);
         services.AddIdentityInfrastructure(configuration);
+        services.AddInstitutionInfrastructure();
+        services.AddFileStorage(configuration);
 
         services.AddScoped<TenantContext>();
         services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());

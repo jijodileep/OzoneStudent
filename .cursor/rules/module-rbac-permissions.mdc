@@ -1,6 +1,6 @@
 ---
 description: RBAC module — roles, permissions, scope assignment
-globs: src/**/Modules/{Identity,Authorization}/**/*
+globs: src/SchoolSaaS.Application/Commands/Rbac/**,src/SchoolSaaS.Application/Queries/Rbac/**,src/SchoolSaaS.Api/Endpoints/Rbac/**,src/**/Modules/{Identity,Authorization}/**/*
 alwaysApply: false
 ---
 

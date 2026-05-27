@@ -29,7 +29,13 @@ src/
     Behaviors/                    MediatR pipeline
   SchoolSaaS.Infrastructure/   EF, JWT, repositories, outbox
   SchoolSaaS.Api/
-    Endpoints/                   Maps HTTP → MediatR (Auth, Users, Tenants, …)
+    Endpoints/{Module}/          Maps HTTP → MediatR — one subfolder per module
+      Auth/AuthEndpoints.cs
+      Users/UserEndpoints.cs
+      Tenants/TenantEndpoints.cs
+      Audit/AuditEndpoints.cs
+      Platform/PlatformEndpoints.cs
+      Rbac/RoleEndpoints.cs
 ```
 
 Future optional layout: `src/Modules/{Module}/` with the same Commands/Queries pattern inside each module.
